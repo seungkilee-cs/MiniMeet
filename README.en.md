@@ -29,21 +29,19 @@ Nestjs, Typescript, TypeOrm, Socket.io, WebRTC, Peerjs
 - AWS ElasticSearch -> ElasticSearch on Docker (Same technology, containerized)
 - Apache Kafka -> Redis Streams (Simpler setup, similar functionality
 
-### Backend Service Architecture
+### Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   API Gateway    │    │  Media Server   │
-│   (React+TS)    │◄──►│   (NestJS)       │◄──►│   (Janus Alt)   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                    ┌───────────┼───────────┐
-                    │           │           │
-            ┌───────▼──┐ ┌──────▼──┐ ┌─────▼─────┐
-            │ Socket.io│ │Database │ │  Cache/   │
-            │ Service  │ │Services │ │ Analytics │
-            └──────────┘ └─────────┘ └───────────┘
-```
+┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
+│ Frontend │ │ API Gateway │ │ Media Server │
+│ (React+TS) │◄──►│ (NestJS) │◄──►│ (Janus Alt) │
+└─────────────────┘ └──────────────────┘ └─────────────────┘
+│
+┌───────────┼───────────┐
+│ │ │
+┌───────▼──┐ ┌──────▼──┐ ┌─────▼─────┐
+│ Socket.io│ │Database │ │ Cache/ │
+│ Service │ │Services │ │ Analytics │
+└──────────┘ └─────────┘ └───────────┘
 
 ### Service Breakdown
 
