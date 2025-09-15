@@ -18,16 +18,18 @@ Video Chat Application using Nestjs, Typescript, Socketio
 
 #### As Is
 
-Nestjs, Typescript, TypeOrm, Socket.io, WebRTC, Peerjs
+`Nestjs, Typescript, TypeOrm, Socket.io, WebRTC, Peerjs`
 
 #### Alternative
 
-- AWS EKS -> Docker Compose (Local development, easier setup)
+```
+- AWS EKS                 -> Docker Compose (Local development, easier setup)
 - AWS DocumentDB(MongoDB) -> MongoDB (Same API, free for development)
-- AWS Aurora(MySQL) -> MySQL (Same database engine)
-- Janus Gateway -> Simple WebRTC SFU (Open source alternative)
-- AWS ElasticSearch -> ElasticSearch on Docker (Same technology, containerized)
-- Apache Kafka -> Redis Streams (Simpler setup, similar functionality
+- AWS Aurora(MySQL)       -> MySQL (Same database engine)
+- Janus Gateway           -> Simple WebRTC SFU (Open source alternative)
+- AWS ElasticSearch       -> ElasticSearch on Docker (Same technology, containerized)
+- Apache Kafka            -> Redis Streams (Simpler setup, similar functionality)
+```
 
 ### Backend Service Architecture
 
