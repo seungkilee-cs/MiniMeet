@@ -478,9 +478,51 @@ curl http://localhost:3001/users/096959bc-8fa8-4f36-b0da-1d745783d67c
 query: SELECT `User`.`id` AS `User_id`, `User`.`email` AS `User_email`, `User`.`username` AS `User_username`, `User`.`isActive` AS `User_isActive`, `User`.`createdAt` AS `User_createdAt`, `User`.`updatedAt` AS `User_updatedAt` FROM `user` `User` WHERE ((`User`.`id` = ?)) LIMIT 1 -- PARAMETERS: ["096959bc-8fa8-4f36-b0da-1d745783d67c"]
 ```
 
-## Day 2
-
 #### Room Entity & Relationships
+
+##### API Routes for rooms
+
+```bash
+POST   /rooms                     - Create room
+GET    /rooms                     - List all rooms with participants
+GET    /rooms/:id                 - Get specific room
+POST   /rooms/:id/participants    - Add user to room
+DELETE /rooms/:id/participants/:userId - Remove user from room
+GET    /rooms/:id/participants    - List room participants
+DELETE /rooms/:id                 - Delete room
+```
+
+##### Call API
+
+```bash
+# Create room
+curl -X POST http://localhost:3001/rooms \
+  -H "Content-Type: application/json" \
+  -d '{"name":"General Chat","maxParticipants":6}'
+
+# Add user to room
+curl -X POST http://localhost:3001/rooms/ROOM_ID/participants \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"USER_ID"}'
+
+# Get room with participants
+curl http://localhost:3001/rooms/ROOM_ID
+```
+
+##### Response
+
+```bash
+# Create Room Response
+{"id":"71a35d00-6b41-4dd5-81b8-d1ec3ec676ea","name":"General Chat","maxParticipants":6,"isActive":true,"createdAt":"2025-09-15T00:36:40.569Z","updatedAt":"2025-09-15T00:36:40.569Z"}%
+
+# Add user to existing room
+{"id":"71a35d00-6b41-4dd5-81b8-d1ec3ec676ea","name":"General Chat","maxParticipants":6,"isActive":true,"participants":[{"id":"096959bc-8fa8-4f36-b0da-1d745783d67c","email":"john@example.com","username":"johndoe","isActive":true,"createdAt":"2025-09-14T23:14:10.168Z","updatedAt":"2025-09-14T23:14:10.168Z"}],"createdAt":"2025-09-15T00:36:40.569Z","updatedAt":"2025-09-15T00:36:40.569Z"}%
+
+# Get room with participants
+{"id":"71a35d00-6b41-4dd5-81b8-d1ec3ec676ea","name":"General Chat","maxParticipants":6,"isActive":true,"participants":[{"id":"096959bc-8fa8-4f36-b0da-1d745783d67c","email":"john@example.com","username":"johndoe","isActive":true,"createdAt":"2025-09-14T23:14:10.168Z","updatedAt":"2025-09-14T23:14:10.168Z"}],"createdAt":"2025-09-15T00:36:40.569Z","updatedAt":"2025-09-15T00:36:40.569Z"}%
+```
+
+## Day 2
 
 ### Real Time Handling
 

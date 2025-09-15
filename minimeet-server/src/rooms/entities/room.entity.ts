@@ -2,28 +2,30 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToMany,
+  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
 } from 'typeorm';
-import { Room } from '../../rooms/entities/room.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
-export class User {
+export class Room {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
-  email: string;
+  name: string;
 
-  @Column()
-  username: string;
+  @Column({ default: 4 })
+  maxParticipants: number;
 
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToMany(() => Room, (room) => room.participants)
-  rooms: Room[];
+  @ManyToMany(() => User, (user) => user.rooms, { cascade: true })
+  @JoinTable()
+  participants: User[];
 
   @CreateDateColumn()
   createdAt: Date;
