@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   mysql:
     image: mysql:8.0
@@ -28,7 +27,7 @@ services:
   elasticsearch:
     image: elasticsearch:8.8.0
     container_name: minimeet-elasticsearch
-    platform: linux/arm64 # M1 compatibility
+    platform: linux/arm64
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
