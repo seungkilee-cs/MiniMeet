@@ -1023,11 +1023,60 @@ Successfully connected to the server! Socket ID: IkjyLdxi3so9E4-2AAAD websocket-
 
 I need to be able to interact the Rooms in Real Time.
 
-###### 2.1.2.1. Update VideoGateway with Room Handlers
+###### 2.1.2.1. Inject Rooms Service
 
-###### 2.1.2.2. Update the Video Modules
+VideoGateway has to be able to communicate with RoomsService if it wants to update database. I'll be using NestJS's dependency injection.
 
-###### 2.1.2.3. Verify
+`minimeet-server/src/video/video.gateway.ts`
+
+```ts
+
+```
+
+###### 2.1.2.2. Create Handles for Joining and Leaving the Room
+
+Add imports to `minimeet-server/src/video/video.gateway.ts`
+
+```ts
+// In Imports
+SubscribeMessage,
+MessageBody,
+ConnectedSocket
+
+// In Gateway class
+
+@SubscribeMessage('joinRoom')
+async handleJoinRoom(
+    @MessageBody() data: { roomId: string; userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { roomId, userId } = data;
+    this.logger.log(`User ${userId} attempting to join room ${roomId}`);
+
+    client.join(roomId);
+    const room = await this.roomsService.addUserToRoom(roomId, userId);
+    this.server.to(roomId).emit('participantsUpdate', room.participants);
+  }
+
+@SubscribeMessage('leaveRoom')
+async handleLeaveRoom(
+    @MessageBody() data: { roomId: string; userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { roomId, userId } = data;
+    this.logger.log(`User ${userId} attempting to leave room ${roomId}`);
+
+    client.leave(roomId);
+    const room = await this.roomsService.removeUserFromRoom(roomId, userId);
+    this.server.to(roomId).emit('participantsUpdate', room.participants);
+  }
+```
+
+###### 2.1.2.3. Update handleDisconnect
+
+###### 2.1.2.4. Verify Room Handling Connection
+
+## Day 3
 
 ##### 2.1.3. WebSocket Authentication
 

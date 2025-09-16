@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Test - Fixed</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { background: #e8f5e8; padding: 10px; margin: 10px 0; }
+        .error { background: #ffeaea; padding: 10px; margin: 10px 0; }
+        .participants { background: #f8f9fa; padding: 15px; margin: 10px 0; }
+        input, button { margin: 5px; padding: 8px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1> MiniMeet Room Test Temp V2 </h1>
+    
+    <div>
+        <!-- Use REAL IDs from your database here -->
+        <input id="userId" type="text" placeholder="Real User UUID from database" style="width: 300px;" />
+        <input id="roomId" type="text" placeholder="Real Room UUID from database" style="width: 300px;" />
+        <br>
+        <button onclick="connect()">Connect</button>
+        <button onclick="joinRoom()">Join Room</button>
+        <button onclick="leaveRoom()">Leave Room</button>
+    </div>
+
+    <div id="status" class="status">Not connected</div>
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div class="participants">
+        <h3>Room Participants:</h3>
+        <div id="participants">No participants yet</div>
+    </div>
+
+    <div class="participants">
+        <h3>Console Logs:</h3>
+        <div id="logs" style="height: 200px; overflow-y: scroll; background: #000; color: #0f0; padding: 10px; font-family: monospace;"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        let socket;
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('logs');
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function connect() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                showError('Please enter a REAL User UUID from your database');
+                return;
+            }
+
+            if (socket) socket.disconnect();
+
+            socket = io("http://localhost:3001");
+
+            socket.on("connect", () => {
+                log(`✅ Connected! Socket ID: ${socket.id}`);
+                updateStatus(`Connected as ${userId}`);
+            });
+
+            socket.on("disconnect", () => {
+                log("❌ Disconnected from server");
+                updateStatus("Disconnected");
+            });
+
+            // THESE ARE THE MISSING EVENT LISTENERS!
+            socket.on("joinRoomSuccess", (data) => {
+                log(`✅ JOIN SUCCESS: ${data.message}`);
+                updateStatus(`In room: ${data.roomId}`);
+            });
+
+            socket.on("joinRoomError", (data) => {
+                log(`❌ JOIN ERROR: ${data.error}`);
+                showError(`Join failed: ${data.error}`);
+            });
+
+            socket.on("leaveRoomSuccess", (data) => {
+                log(`✅ LEAVE SUCCESS: ${data.message}`);
+            });
+
+            socket.on("leaveRoomError", (data) => {
+                log(`❌ LEAVE ERROR: ${data.error}`);
+                showError(`Leave failed: ${data.error}`);
+            });
+
+            // THIS IS THE KEY EVENT FOR DISPLAYING PARTICIPANTS!
+            socket.on("participantsUpdate", (data) => {
+                log(`👥 PARTICIPANTS UPDATE: Room ${data.roomId} has ${data.participants.length} users`);
+                displayParticipants(data.participants);
+            });
+        }
+
+        function joinRoom() {
+            if (!socket || !socket.connected) {
+                showError('Please connect first');
+                return;
+            }
+
+            const roomId = document.getElementById('roomId').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+
+            if (!roomId || !userId) {
+                showError('Please enter REAL Room UUID and User UUID');
+                return;
+            }
+
+            log(`📤 Sending joinRoom event: roomId=${roomId}, userId=${userId}`);
+            socket.emit('joinRoom', { roomId, userId });
+        }
+
+        function leaveRoom() {
+            if (!socket || !socket.connected) {
+                showError('Please connect first');
+                return;
+            }
+
+            const roomId = document.getElementById('roomId').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+
+            if (!roomId || !userId) {
+                showError('Please enter REAL Room UUID and User UUID');
+                return;
+            }
+
+            log(`📤 Sending leaveRoom event: roomId=${roomId}, userId=${userId}`);
+            socket.emit('leaveRoom', { roomId, userId });
+        }
+
+        function displayParticipants(participants) {
+            const participantsDiv = document.getElementById('participants');
+            
+            if (!participants || participants.length === 0) {
+                participantsDiv.innerHTML = 'No participants in room';
+                return;
+            }
+
+            const participantsList = participants.map(p => 
+                `<div style="padding: 5px; border-bottom: 1px solid #ddd;">
+                    👤 <strong>${p.username}</strong> (${p.email})<br>
+                    <small>ID: ${p.id}</small>
+                </div>`
+            ).join('');
+            
+            participantsDiv.innerHTML = participantsList;
+        }
+    </script>
+</body>
+</html

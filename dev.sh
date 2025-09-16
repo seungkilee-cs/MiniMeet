@@ -4,7 +4,7 @@ case "$1" in
 start)
   ./_scripts/start_minimeet_dev.sh
   ;;
-stop)
+end)
   ./_scripts/stop_minimeet_dev.sh
   ;;
 restart)
@@ -15,7 +15,7 @@ restart)
 clean)
   ./_scripts/cleanup_minimeet_dev.sh
   ;;
-status)
+show)
   echo "Docker containers:"
   docker ps --format "table {{.Names}}\t{{.Status}}"
   echo ""
@@ -27,14 +27,14 @@ status)
   fi
   ;;
 *)
-  echo "Usage: $0 {start|stop|restart|clean|status}"
+  echo "Usage: $0 {start|end|restart|clean|show}"
   echo ""
   echo "Commands:"
   echo "  start   - Start development environment"
-  echo "  stop    - Stop development environment"
+  echo "  end     - Stop development environment"
   echo "  restart - Restart development environment"
   echo "  clean   - Stop and remove all data (⚠️ destructive)"
-  echo "  status  - Show current status"
+  echo "  show  - Show current status"
   exit 1
   ;;
 esac
