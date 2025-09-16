@@ -1021,6 +1021,12 @@ Successfully connected to the server! Socket ID: IkjyLdxi3so9E4-2AAAD websocket-
 
 ##### 2.1.2. Room Management via WebSocket
 
+###### 2.1.2.1. Update VideoGateway with Room Handlers
+
+###### 2.1.2.2. Update the Video Modules
+
+###### 2.1.2.3. Verify
+
 ##### 2.1.3. WebSocket Authentication
 
 ##### 2.1.4. Basic Chat Functionality (POC)

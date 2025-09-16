@@ -1,6 +1,10 @@
-# minimeet
+# MiniMeet
 
 Video Chat Application using Nestjs, Typescript, Socketio
+
+## Motivation
+
+To Build a Functioning Prototype of Real Time Video Chat Application using specific tech stack
 
 ## Application Overview
 
@@ -36,15 +40,15 @@ Video Chat Application using Nestjs, Typescript, Socketio
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   API Gateway    │    │  Media Server   │
-│   (React+TS)    │◄──►│   (NestJS)       │◄──►│   (Janus Alt)   │
+│   (React+TS)    │◄──►│   (NestJS+TS)    │◄──►│   (Janus Alt)   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                 │
                     ┌───────────┼───────────┐
                     │           │           │
-            ┌───────▼──┐ ┌──────▼──┐ ┌─────▼─────┐
-            │ Socket.io│ │Database │ │  Cache/   │
-            │ Service  │ │Services │ │ Analytics │
-            └──────────┘ └─────────┘ └───────────┘
+            ┌───────▼───┐ ┌──────▼───┐ ┌─────▼─────┐
+            │ Socket.io │ │ Database │ │  Cache/   │
+            │ Service   │ │ Services │ │ Analytics │
+            └───────────┘ └──────────┘ └───────────┘
 ```
 
 ### Service Breakdown
