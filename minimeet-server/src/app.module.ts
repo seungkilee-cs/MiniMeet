@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { VideoGateway } from './video/video.gateway';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { RoomsModule } from './rooms/rooms.module';
     RoomsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, VideoGateway],
 })
 export class AppModule {}

@@ -68,12 +68,27 @@ export class RoomsService {
   }
 
   async removeUserFromRoom(roomId: string, userId: string): Promise<Room> {
+    // Ensure room exists (throws NotFoundException if not found)
     const room = await this.findOne(roomId);
+
+    // Ensure user exists (throws NotFoundException if not found)
     const user = await this.usersService.findOne(userId);
 
-    room.participants = room.participants.filter(
-      (participant) => participant.id !== userId,
+    // Check if user is actually in the room
+    const participantIndex = room.participants.findIndex(
+      (participant) => participant.id === userId,
     );
+
+    if (participantIndex === -1) {
+      throw new BadRequestException(
+        `User ${user.username} is not a participant in room ${room.name}`,
+      );
+    }
+
+    // Remove the user from participants
+    room.participants.splice(participantIndex, 1);
+
+    // Save and return updated room
     return this.roomsRepository.save(room);
   }
 
