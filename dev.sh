@@ -2,18 +2,18 @@
 
 case "$1" in
 start)
-  ./start_minimeet_dev.sh
+  ./_scripts/start_minimeet_dev.sh
   ;;
 stop)
-  ./stop_minimeet_dev.sh
+  ./_scripts/stop_minimeet_dev.sh
   ;;
 restart)
-  ./stop_minimeet_dev.sh
+  ./_scripts/stop_minimeet_dev.sh
   sleep 2
-  ./start_minimeet_dev.sh
+  ./_scripts/start_minimeet_dev.sh
   ;;
 clean)
-  ./cleanup_minimeet_dev.sh
+  ./_scripts/cleanup_minimeet_dev.sh
   ;;
 status)
   echo "Docker containers:"

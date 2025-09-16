@@ -1021,6 +1021,8 @@ Successfully connected to the server! Socket ID: IkjyLdxi3so9E4-2AAAD websocket-
 
 ##### 2.1.2. Room Management via WebSocket
 
+I need to be able to interact the Rooms in Real Time.
+
 ###### 2.1.2.1. Update VideoGateway with Room Handlers
 
 ###### 2.1.2.2. Update the Video Modules

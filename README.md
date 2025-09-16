@@ -1,10 +1,34 @@
 # MiniMeet
 
-Video Chat Application using Nestjs, Typescript, Socketio
+Multi-User Video Chat Application using Nestjs, Typescript, TypeORM, Socket.io, WebRTC
 
 ## Motivation
 
 To Build a Functioning Prototype of Real Time Video Chat Application using specific tech stack
+
+## Goal
+
+### 1.Backend Foundation
+
+#### Problem Breakdown
+
+- Data Persistence Problem: "How do we reliably store and manage user accounts and room information?"
+- API Consistency Problem: "How do we provide predictable, type-safe interfaces for frontend consumption?"
+- Architecture Scalability Problem: "How do we build modular code that won't become unmaintainable?"
+
+#### Deliverables
+
+- [ ] Validated user registration/authentication system
+- [ ] Room creation and management with participant tracking
+- [ ] RESTful API endpoints that frontend can consume
+- [ ] Database relationships that support complex real-time interactions
+- [ ] Error handling and validation
+
+### 2. Real-Time Communication Backend
+
+### 3. Frontend
+
+### 4. Performance, Feature, Deployment, Scalability
 
 ## Application Overview
 
@@ -12,7 +36,7 @@ To Build a Functioning Prototype of Real Time Video Chat Application using speci
 
 - User registration/authentication
 - Create/join video chat rooms
-- 1-on-1 and group video calls (up to 4 participants)
+- 1-on-1 and group video calls (up to 4 participants for POC)
 - Real-time text chat alongside video
 - Chat history search
 - Basic call analytics
@@ -42,9 +66,9 @@ To Build a Functioning Prototype of Real Time Video Chat Application using speci
 │   Frontend      │    │   API Gateway    │    │  Media Server   │
 │   (React+TS)    │◄──►│   (NestJS+TS)    │◄──►│   (Janus Alt)   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                    ┌───────────┼───────────┐
-                    │           │           │
+                                 │
+                    ┌────────────┼───────────┐
+                    │            │           │
             ┌───────▼───┐ ┌──────▼───┐ ┌─────▼─────┐
             │ Socket.io │ │ Database │ │  Cache/   │
             │ Service   │ │ Services │ │ Analytics │
