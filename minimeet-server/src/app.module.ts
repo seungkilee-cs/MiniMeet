@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { VideoGateway } from './video/video.gateway';
+import { AuthModule } from './auth/auth.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { VideoGateway } from './video/video.gateway';
     }),
     UsersModule,
     RoomsModule,
+    AuthModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService, VideoGateway],

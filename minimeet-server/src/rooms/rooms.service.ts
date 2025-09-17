@@ -85,10 +85,10 @@ export class RoomsService {
       );
     }
 
-    // Remove the user from participants
+    // Remove the user from participants array
     room.participants.splice(participantIndex, 1);
 
-    // Save and return updated room
+    // Save updated room (this removes the entry from junction table)
     return this.roomsRepository.save(room);
   }
 
@@ -100,5 +100,16 @@ export class RoomsService {
   async remove(id: string): Promise<void> {
     const room = await this.findOne(id);
     await this.roomsRepository.remove(room);
+  }
+
+  async findRoomsByUserId(userId: string): Promise<Room[]> {
+    return this.roomsRepository.find({
+      where: {
+        participants: {
+          id: userId,
+        },
+      },
+      relations: ['participants'],
+    });
   }
 }

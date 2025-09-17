@@ -1,12 +1,12 @@
 # Dev Log
 
-## Day 1
+<!--09/15/2025-->
 
-### 1. Database Setup
+## 1. Database Setup
 
-#### 1.1. Docker Setup
+### 1.1. Docker Setup
 
-##### 1.1.1. Docker Compose Setup
+#### 1.1.1. Docker Compose Setup
 
 ```yml
 # docker-compose.yml
@@ -68,9 +68,9 @@ Run docker compose once verified
 docker-compose up -d
 ```
 
-##### 1.1.2. Docker Setup Verification
+#### 1.1.2. Docker Setup Verification
 
-###### 1.1.2.1. All Conatiners Running
+##### 1.1.2.1. All Conatiners Running
 
 ```bash
 ❯ docker ps
@@ -81,7 +81,7 @@ aeaa77fd0907   elasticsearch:8.8.0                  "/bin/tini -- /usr/l…"   A
 f063858e895c   mongo:6.0                            "docker-entrypoint.s…"   About a minute ago   Up About a minute        0.0.0.0:27017->27017/tcp            minimeet-mongo
 ```
 
-###### 1.1.2.2. MySQL Ready for Connection
+##### 1.1.2.2. MySQL Ready for Connection
 
 ```bash
 ❯ docker logs minimeet-mysql
@@ -114,7 +114,7 @@ docker exec -it minimeet-mysql mysql -u {SOME_USER} -p {SOME_PASSWORD} -e "SHOW 
 +--------------------+
 ```
 
-###### 1.1.2.3. ElasticSearch Returns JSON Cluster
+##### 1.1.2.3. ElasticSearch Returns JSON Cluster
 
 ```bash
 ❯ curl http://localhost:9200
@@ -137,7 +137,7 @@ docker exec -it minimeet-mysql mysql -u {SOME_USER} -p {SOME_PASSWORD} -e "SHOW 
 }
 ```
 
-###### 1.1.2.4. Redis Ready for TCP
+##### 1.1.2.4. Redis Ready for TCP
 
 ```bash
 ❯ docker logs minimeet-redis
@@ -150,9 +150,9 @@ docker exec -it minimeet-mysql mysql -u {SOME_USER} -p {SOME_PASSWORD} -e "SHOW 
 1:M 15 Sep 2025 06:16:25.019 * Ready to accept connections tcp
 ```
 
-#### 1.2. NestJS Project Setup
+### 1.2. NestJS Project Setup
 
-##### 1.2.1. Nest Backend Creation
+#### 1.2.1. Nest Backend Creation
 
 ```bash
 npm i -g @nestjs/cli
@@ -162,7 +162,7 @@ npm install @nestjs/typeorm typeorm mysql2
 npm install @nestjs/config
 ```
 
-##### 1.2.2. Connect DB to Nextjs
+#### 1.2.2. Connect DB to Nextjs
 
 When I run `npm run start:dev` at `localhost:3000`` it should show hello world.
 
@@ -178,7 +178,7 @@ I see. The issue here is that running docker for mac (for the docker compose) is
 
 Okay. It works great. Now, let's actually connect using TypeORM.
 
-##### 1.2.3. Nestjs TypeORM Configure
+#### 1.2.3. Nestjs TypeORM Configure
 
 Update the `minimeet-server/src/app.module.ts` file
 
@@ -212,9 +212,9 @@ import { AppService } from "./app.service";
 export class AppModule {}
 ```
 
-#### 1.3. Add NestJS Entity and Endpoints
+### 1.3. Add NestJS Entity and Endpoints
 
-##### 1.3.1. User Entity
+#### 1.3.1. User Entity
 
 Basic User Entity created at `src/users/entities/user.entity.ts`
 
@@ -259,7 +259,7 @@ npx nest generate service users
 npx nest generate controller users
 ```
 
-##### 1.3.2. Users Module
+#### 1.3.2 Users Module
 
 ```ts
 import { Module } from "@nestjs/common";
@@ -277,7 +277,7 @@ import { User } from "./entities/user.entity";
 export class UsersModule {}
 ```
 
-##### 1.3.2. Users Service
+#### 1.3.3. Users Service
 
 Basic TypeORM functions for Create and Read operation. Inject Repository to the entity we created.
 
@@ -314,7 +314,7 @@ export class UsersService {
 }
 ```
 
-##### 1.3.3. Users Controller
+#### 1.3.4. Users Controller
 
 Basic controller for hitting the Services to invoke TypeORM methods.
 
@@ -346,7 +346,7 @@ export class UsersController {
 }
 ```
 
-##### 1.3.4. Debugging
+#### 1.3.5. Debugging
 
 Hmm, getting this error as I check the Nestjs server terminal
 
@@ -371,11 +371,11 @@ Is this the Nestjs best practice? -> Okay, so the best practice is the throw exc
   }
 ```
 
-##### 1.3.5. Update app.module.ts
+#### 1.3.6. Update app.module.ts
 
 Oh, actually running npx nest generate automatically updates the app.module.ts to include then under imports. Sweet.
 
-##### 1.3.6. Verify Connection
+#### 1.3.7. Verify Connection
 
 Now, let's see if the connection is made on nestjs when I run `npm run start:dev`
 
@@ -527,11 +527,11 @@ query: SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `TABLE_COMMENT` FROM `INFORMATION_SC
 [RouterExplorer] Mapped {/users/:id, GET} route
 ```
 
-#### 1.4. CRUD Verification for User
+### 1.4. CRUD Verification for User
 
 Now that I have the entities and routes set up, let's verify.
 
-##### 1.4.1. CREATE
+#### 1.4.1. CREATE
 
 Hit the endpoint we made on `user.controller`
 
@@ -551,9 +551,9 @@ query: SELECT `User`.`id` AS `User_id`, `User`.`isActive` AS `User_isActive`, `U
 query: COMMIT
 ```
 
-##### 1.4.2. READ
+#### 1.4.2. READ
 
-###### 1.4.2.1. Get All Users
+##### 1.4.2.1. Get All Users
 
 ```bash
 # API Call
@@ -566,7 +566,7 @@ curl http://localhost:3001/users
 query: SELECT `User`.`id` AS `User_id`, `User`.`email` AS `User_email`, `User`.`username` AS `User_username`, `User`.`isActive` AS `User_isActive`, `User`.`createdAt` AS `User_createdAt`, `User`.`updatedAt` AS `User_updatedAt` FROM `user` `User`
 ```
 
-###### 1.4.2.2. Get a Specific User
+##### 1.4.2.2. Get a Specific User
 
 ```bash
 # API Call
@@ -583,7 +583,7 @@ query: SELECT `User`.`id` AS `User_id`, `User`.`email` AS `User_email`, `User`.`
 
 Now that I see the user entity and endpoints working, let's make the room entity as initially designed.
 
-##### 1.5.1. API Routes for Rooms
+#### 1.5.1. API Routes for Rooms
 
 Here is my plan for the generic endpoint for Room on CRUD operation. Add as needed.
 
@@ -641,7 +641,7 @@ export class Room {
 }
 ```
 
-##### 1.5.2. Rooms Module
+#### 1.5.2. Rooms Module
 
 Make sure to correctly import User entity for the correct relationship ownership
 
@@ -663,7 +663,7 @@ import { UsersModule } from "../users/users.module";
 export class RoomsModule {}
 ```
 
-##### 1.5.3. Rooms Service
+#### 1.5.3. Rooms Service
 
 Implement the API routes I planned for the CRUD operation. I need to call on the UsersService for removing user from the room.
 
@@ -774,7 +774,7 @@ export class RoomsService {
 }
 ```
 
-##### 1.5.4. Rooms Controller
+#### 1.5.4. Rooms Controller
 
 ```ts
 import { Controller, Get, Post, Body, Param, Delete } from "@nestjs/common";
@@ -832,7 +832,7 @@ export class RoomsController {
 }
 ```
 
-##### 1.5.5. Update User Entity
+#### 1.5.5. Update User Entity
 
 In User Entity, update to include the many to many relationship mapping. Each User will be able to join multiple rooms, so each user will hold array of Rooms.
 
@@ -845,7 +845,7 @@ import { Room } from '../../rooms/entities/room.entity';
   rooms: Room[];
 ```
 
-##### 1.5.6. Verify Endpoint
+#### 1.5.6. Verify Endpoint
 
 ```bash
 # Create room
@@ -862,7 +862,7 @@ curl -X POST http://localhost:3001/rooms/ROOM_ID/participants \
 curl http://localhost:3001/rooms/ROOM_ID
 ```
 
-##### 1.5.7. Response
+#### 1.5.7. Response
 
 ```bash
 # Create Room Response
@@ -875,21 +875,21 @@ curl http://localhost:3001/rooms/ROOM_ID
 {"id":"71a35d00-6b41-4dd5-81b8-d1ec3ec676ea","name":"General Chat","maxParticipants":6,"isActive":true,"participants":[{"id":"096959bc-8fa8-4f36-b0da-1d745783d67c","email":"john@example.com","username":"johndoe","isActive":true,"createdAt":"2025-09-14T23:14:10.168Z","updatedAt":"2025-09-14T23:14:10.168Z"}],"createdAt":"2025-09-15T00:36:40.569Z","updatedAt":"2025-09-15T00:36:40.569Z"}%
 ```
 
-##### 1.5.8. Add Automated Test for all Routes
+#### 1.5.8. Add Automated Test for all Routes
 
 ---
 
-## Day 2
+<!--16/09/2025-->
 
-### 2. Real Time Messaging and Video Signaling
+## 2. Real Time Messaging and Video Signaling
 
-#### 2.1. Socket.io Integration
+### 2.1. Socket.io Integration
 
 Alright, so goal of this milestone is to set up a basic WebSocket server that can recognize when users connect and disconnect.
 
-##### 2.1.1. Basic WebSocket Gateway
+#### 2.1.1. Basic WebSocket Gateway
 
-###### 2.1.1.1 Install WebSocket Dependencies
+##### 2.1.1.1 Install WebSocket Dependencies
 
 So for nestjs Websocket, I need to install dependencies
 
@@ -906,7 +906,7 @@ Now create nestjs gateway for video. Add to providers in app.module.ts -> actual
 npx nest generate gateway video
 ```
 
-###### 2.1.1.2. Implement the Gateway Placeholder Logic
+##### 2.1.1.2. Implement the Gateway Placeholder Logic
 
 now let's open up `minimeet-server/src/video/video.gateway.ts`
 
@@ -959,7 +959,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 }
 ```
 
-###### 2.1.1.3. Verify the Connection to WebSocket server from Nestjs server using Socket.io
+##### 2.1.1.3. Verify the Connection to WebSocket server from Nestjs server using Socket.io
 
 Now, let's test if it works.
 
@@ -1019,11 +1019,11 @@ Successfully connected to the server! Socket ID: IkjyLdxi3so9E4-2AAAD websocket-
 [Nest] 48835  - 09/16/2025, 2:11:29 PM     LOG [VideoGateway] Client disconnected: IkjyLdxi3so9E4-2AAAD
 ```
 
-##### 2.1.2. Room Management via WebSocket
+#### 2.1.2. Room Management via WebSocket
 
 I need to be able to interact the Rooms in Real Time.
 
-###### 2.1.2.1. Inject Rooms Service
+##### 2.1.2.1. Inject Rooms Service
 
 VideoGateway has to be able to communicate with RoomsService if it wants to update database. I'll be using NestJS's dependency injection.
 
@@ -1033,7 +1033,7 @@ VideoGateway has to be able to communicate with RoomsService if it wants to upda
 
 ```
 
-###### 2.1.2.2. Create Handles for Joining and Leaving the Room
+##### 2.1.2.2. Create Handles for Joining and Leaving the Room
 
 Add imports to `minimeet-server/src/video/video.gateway.ts`
 
@@ -1072,30 +1072,128 @@ async handleLeaveRoom(
   }
 ```
 
-###### 2.1.2.3. Update handleDisconnect
+##### 2.1.2.3. Update handleDisconnect
 
-###### 2.1.2.4. Verify Room Handling Connection
+##### 2.1.2.4. Verify Room Handling Connection
 
-## Day 3
+<!--2025-09-17-->
 
-##### 2.1.3. WebSocket Authentication
+#### 2.1.3. WebSocket Authentication
 
-##### 2.1.4. Basic Chat Functionality (POC)
+Now that I have the connection established and room management logic implemented for the WebSocket Connection, I need to secure this connection. I'll be using JWT for this.
 
-#### 2.2. WebRTC Signaling Server (Built on Socket.io)
+##### 2.1.3.1. Install JWT Dependencies
 
-##### 2.2.1. Offer and Answer Exchange
+under the server directory, I will install JWT for nestjs
 
-##### 2.2.2. ICE Candidate Exchange
+```bash
+npm install @nestjs/jwt
+npm install @types/jsonwebtoken
+```
 
-### 3. Frontend Setup
+##### 2.1.3.2. Create JWT Authentication Module
 
-#### 3.1. React + TS Setup
+###### 2.1.3.2.1. Create Auth Module
 
-### 4. WebRTC Video Handling
+```bash
+npx nest generate module auth
+npx nest generate service auth
+npx nest generate controller auth
+```
 
-#### 4.1. WebRTC Signaling
+###### 2.1.3.2.2. Create JWT Constants
 
-#### 4.2. WebRTC Client Implementation
+```bash
+touch src/auth/constants.ts
+```
 
-#### 4.3. Video Chat
+```ts
+// src/auth/constants.ts
+export const jwtConstants = {
+  secret: process.env.JWT_SECRET || "secret-key-change-in-production",
+  expiresIn: "24h",
+};
+```
+
+###### 2.1.3.2.3. Implement Auth Module Service Controller
+
+##### 2.1.3.3. Create Auth Guard
+
+```bash
+npx nest generate guard auth
+```
+
+```ts
+
+```
+
+Why promise based instead of generic rxjs? -> For my purposes, this makes more sense. Also, I don't like using forklifts to dig a hole when I can do it with a shovel in the same time. Lastly, I haven't encountered a scenario where observable based guard wins or is needed. Premature optimization to problem I haven't encountered is exactly how I don't learn, but just copy paste. I will change this if needed, but per the functionalities I am trying to implement this doesn't seem necessary.
+
+##### 2.1.3.4. Add Auth to Video Gateway
+
+##### 2.1.3.5. Create Token Generation Endpoint on Auth Controller
+
+##### 2.1.3.6. Verify Authentication
+
+Alright, that was long. Now, let's test everything.
+
+lol, had to enable CORS in the main.ts
+
+###### 2.1.3.6.1. Expected Behavior on Get Token
+
+###### 2.1.3.6.2. Expected Behavior on Connect
+
+###### 2.1.3.6.3. Expected Behavior on Disconnect
+
+###### 2.1.3.6.4. Expected Behavior on Join Room
+
+###### 2.1.3.6.5. Expected Behavior on Leave Room
+
+---
+
+#### 2.1.4. Basic Chat Functionality (POC)
+
+##### 2.1.4.1. Create Message Entity, Module, Service, Controller
+
+Alright, now I need another module and entity for message. Getting Repetitive. Maybe I should write a script.
+
+```bash
+npx nest generate module messages
+npx nest generate service messages
+npx nest generate controller messages
+
+mkdir -p src/messages/entities
+touch src/messages/entities/message.entity.ts
+```
+
+Given the real time and user generated nature of the messages that require validation and filtering, I think it makes sense to create DTOs.
+
+```bash
+mkdir -p src/messages/dto
+touch src/messages/dto/create-message.dto.ts
+touch src/messages/dto/update-message.dto.ts
+```
+
+##### 2.1.4.2. Update VideoGateway with Message Handlers
+
+##### 2.1.4.3. Verify Chat Room Functionality
+
+---
+
+### 2.2. WebRTC Signaling Server (Built on Socket.io)
+
+#### 2.2.1. Offer and Answer Exchange
+
+#### 2.2.2. ICE Candidate Exchange
+
+## 3. Frontend Setup
+
+### 3.1. React + TS Setup
+
+## 4. WebRTC Video Handling
+
+### 4.1. WebRTC Signaling
+
+### 4.2. WebRTC Client Implementation
+
+### 4.3. Video Chat
