@@ -14,6 +14,7 @@ import { Logger } from '@nestjs/common';
 import { RoomsService } from '../rooms/rooms.service';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '../auth/ws-auth.guard';
+import { MessagesService } from '../messages/messages.service';
 
 @UseGuards(WsAuthGuard) // Apply guard to the whole gateway
 @WebSocketGateway({
@@ -29,7 +30,10 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private logger: Logger = new Logger('VideoGateway');
 
-  constructor(private readonly roomsService: RoomsService) {}
+  constructor(
+    private readonly roomsService: RoomsService,
+    private readonly messagesService: MessagesService,
+  ) {}
 
   /* keep track of which user belongs to which socket, temporarilyi use in-memory map. fine for now. */
   private connectedUsers: Map<string, string> = new Map();
@@ -203,6 +207,124 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.error(`❌ Error leaving room: ${error.message}`);
       client.emit('leaveRoomError', {
         roomId,
+        error: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(
+    @MessageBody() data: { roomId: string; content: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    const { roomId, content } = data;
+
+    if (!user || !user.id) {
+      this.logger.error('Message send attempted by unauthenticated user');
+      client.emit('messageError', {
+        error: 'User not authenticated',
+      });
+      return;
+    }
+
+    if (!content || content.trim().length === 0) {
+      client.emit('messageError', {
+        error: 'Message content cannot be empty',
+      });
+      return;
+    }
+
+    this.logger.log(`User ${user.username} sending message to room ${roomId}`);
+
+    try {
+      // Save message to database
+      const message = await this.messagesService.create(
+        content.trim(),
+        user.id,
+        roomId,
+      );
+      this.logger.log(`✅ Message saved: ${message.id}`);
+
+      // Prepare message for broadcast
+      const messagePayload = {
+        id: message.id,
+        content: message.content,
+        sender: {
+          id: message.sender.id,
+          username: message.sender.username,
+          email: message.sender.email,
+        },
+        roomId: roomId,
+        timestamp: message.createdAt,
+      };
+
+      // Broadcast to all users in the room (including sender)
+      this.server.to(roomId).emit('newMessage', messagePayload);
+      this.logger.log(`✅ Message broadcasted to room ${roomId}`);
+
+      // Confirm message sent to sender
+      client.emit('messageSent', {
+        messageId: message.id,
+        content: message.content,
+      });
+    } catch (error) {
+      this.logger.error(`❌ Error sending message: ${error.message}`);
+      client.emit('messageError', {
+        error: error.message,
+      });
+    }
+  }
+
+  @SubscribeMessage('loadMessageHistory')
+  async handleLoadMessageHistory(
+    @MessageBody() data: { roomId: string; limit?: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    const { roomId, limit = 50 } = data;
+
+    if (!user || !user.id) {
+      this.logger.error(
+        'Message history load attempted by unauthenticated user',
+      );
+      return;
+    }
+
+    this.logger.log(
+      `User ${user.username} loading message history for room ${roomId}`,
+    );
+
+    try {
+      const messages = await this.messagesService.findRecentByRoom(
+        roomId,
+        limit,
+      );
+
+      // Format messages for client
+      const formattedMessages = messages.reverse().map((message) => ({
+        id: message.id,
+        content: message.content,
+        sender: {
+          id: message.sender.id,
+          username: message.sender.username,
+          email: message.sender.email,
+        },
+        roomId: roomId,
+        timestamp: message.createdAt,
+      }));
+
+      client.emit('messageHistory', {
+        roomId,
+        messages: formattedMessages,
+      });
+
+      this.logger.log(
+        `✅ Sent ${formattedMessages.length} messages to ${user.username}`,
+      );
+    } catch (error) {
+      this.logger.error(`❌ Error loading message history: ${error.message}`);
+      client.emit('messageError', {
         error: error.message,
       });
     }
