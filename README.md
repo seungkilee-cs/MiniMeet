@@ -1,122 +1,253 @@
 # MiniMeet
+> [한글](README.ko.md)로도 볼 수 있습니다.
 
-Multi-User Video Chat Application using Nestjs, Typescript, TypeORM, Socket.io, WebRTC
+Multi-User Video Chat Application using NestJS, TypeScript, TypeORM, Socket.IO, WebRTC
 
 ## Motivation
 
-To Build a Functioning Prototype of Real Time Video Chat Application using specific tech stack
+To build a functioning prototype of a real-time video chat application using a specific tech stack, demonstrating enterprise-grade architecture patterns and distributed systems principles.
 
-## Goal
+## Current Status
 
-### 1.Backend Foundation
+✅ Completed Milestones:
 
-#### Problem Breakdown
+- Backend Foundation : NestJS API with TypeORM, MySQL integration
+- Authentication System : JWT-based auth with WebSocket security guards
+- Real-Time Chat : Socket.IO messaging with DTO validation
 
-- Data Persistence Problem: "How do we reliably store and manage user accounts and room information?"
-- API Consistency Problem: "How do we provide predictable, type-safe interfaces for frontend consumption?"
-- Architecture Scalability Problem: "How do we build modular code that won't become unmaintainable?"
+🚧 In Progress:
 
-MongoDB is likely used for the chat message, where the message entity itself can include various forms that includes attachments, images, videos, etc. For now, focus on building POC with SQL but add DTO on the message side to make this flexible and expandable later.
+- WebRTC Video Implementation (Milestone 2.5): Peer-to-peer video streaming
+- React + TypeScript Frontend: Production-ready client interface
+
+## Goal & Roadmap
+
+### ✅ 1. Backend Foundation (COMPLETED)
+
+#### Problem Breakdown & Solutions
+
+- Data Persistence: ✅ Reliable user accounts and room management with TypeORM + MySQL
+- API Consistency: ✅ Type-safe DTOs with class-validator for robust data contracts
+- Architecture Scalability: ✅ Modular NestJS structure with dependency injection
 
 #### Deliverables
 
 - [x] Room creation and management with participant tracking
-- [x] RESTful API endpoints that frontend can consume
-- [x] Database relationships that support complex real-time interactions
-- [x] Error handling and validation
-- [ ] Validated user registration/authentication system
+- [x] RESTful API endpoints with full type safety
+- [x] Database relationships supporting real-time interactions
+- [x] Comprehensive error handling and DTO validation (Needed for MongoDB Key-Document message Support)
+- [x] JWT authentication system with WebSocket security
+- [x] Real-time text chat with message persistence
+- [x] WebSocket authentication guards and session management
 
-### 2. Real-Time Communication Backend
+### 🚧 2. Real-Time Video Communication (IN PROGRESS)
 
-### 3. Frontend
+#### Problem Breakdown
 
-### 4. Performance, Feature, Deployment, Scalability
+- WebRTC Signaling: Implement offer/answer/ICE candidate exchange via Socket.IO
+- Peer Connection Management: Handle 1-on-1 and multi-party video calls
+- Media Stream Coordination: Camera/microphone access and stream sharing
+- Network Resilience: Handle NAT traversal, connection failures, and reconnections
+
+#### Deliverables
+
+- [ ] WebRTC signaling server implementation
+- [ ] 1-on-1 video call functionality
+- [ ] Multi-party video calls (up to 4 participants)
+- [ ] Media device management (camera/microphone toggle)
+- [ ] Connection state management and error recovery
+
+### 🚧 3. Frontend (PLANNED)
+
+#### Technology Choice: React + TypeScript
+
+- Component Reusability: Modular UI components
+- Type Safety: Shared DTOs between frontend and backend
+- State Management: Complex real-time UI state handling
+- Production Scale: Professional UX for real users
+
+#### Deliverables
+
+- [ ] React + TypeScript project scaffold
+- [ ] Authenticated routing and session management
+- [ ] Real-time chat interface with DTO validation
+- [ ] Video call UI with WebRTC integration
+- [ ] Responsive design for desktop and mobile
+
+### 📈 4. Performance & Scalability (FUTURE)
+
+- [ ] Redis integration for session management and caching
+- [ ] MongoDB for flexible message storage and attachments
+- [ ] ElasticSearch for chat history search
+- [ ] Load balancing and horizontal scaling
+- [ ] Production deployment with Docker
 
 ## Application Overview
 
-### Core Features
+### Core Features (Implemented ✅ / Planned 🚧)
 
-- User registration/authentication
-- Create/join video chat rooms
-- 1-on-1 and group video calls (up to 4 participants for POC)
-- Real-time text chat alongside video
-- Chat history search
-- Basic call analytics
-- User presence indicators
+- [x] ✅ JWT-based user authentication
+- [x] ✅ Create/join video chat rooms with real-time presence
+- [x] ✅ Real-time text chat with message persistence
+- [x] ✅ WebSocket authentication and authorization
+- [x] ✅ DTO-validated message handling
+- [ ] 🚧 1-on-1 and group video calls (WebRTC)
+- [ ] 🚧 React + TypeScript frontend interface
+- [ ] 🚧 Video call controls (mute, camera toggle)
+- [ ] 📈 Chat history search (ElasticSearch)
+- [ ] 📈 Call analytics and user presence indicators
 
 ### Technology Stack
 
-#### Core Functionality
+#### Core Implementation
 
-`Nestjs, Typescript, TypeOrm, Socket.io, WebRTC`
+Backend: `NestJS + TypeScript + TypeORM + Socket.IO + WebRTC`
+Frontend: `React + TypeScript + Socket.IO Client`
+Database: `MySQL (TypeORM) + Redis (Sessions) + MongoDB (Rich Content)`
 
-#### Alternative
+#### Development vs Production
 
 ```
-- AWS EKS                 -> Docker Compose (Local development, easier setup)
-- AWS DocumentDB(MongoDB) -> MongoDB (Same API, free for development)
-- AWS Aurora(MySQL)       -> MySQL (Same database engine)
-- Janus Gateway           -> Simple WebRTC SFU (Open source alternative)
-- AWS ElasticSearch       -> ElasticSearch on Docker (Same technology, containerized)
-- Apache Kafka            -> Redis Streams (Simpler setup, similar functionality)
+Development (Current):
+- MySQL                    -> Simple relational data
+- Socket.IO               -> Real-time communication
+- HTML Test Clients       -> Rapid prototyping
+- Local development       -> Easy setup and testing
+
+Production (Planned):
+- AWS Aurora (MySQL)      -> Managed relational database
+- Redis                   -> Session management and caching
+- MongoDB                 -> Flexible message content storage
+- ElasticSearch           -> Fast full-text search
+- React + TS Frontend     -> Professional user interface
+- Docker Compose          -> Containerized deployment
 ```
 
-### Backend Service Architecture
+### Backend Architecture
+
+```
+┌─────────────────┐    ┌──────────────────────────────────┐
+│   Test Client   │    │         NestJS Backend           │
+│                 │◄──►│  ┌─────────────────────────────┐ │
+└─────────────────┘    │  │     VideoGateway            │ │
+                       │  │   (Socket.IO + Auth)        │ │
+                       │  └─────────────────────────────┘ │
+                       │  ┌─────────┬─────────┬─────────┐ │
+                       │  │  Auth   │  Rooms  │Messages │ │
+                       │  │ Module  │ Module  │ Module  │ │
+                       │  └─────────┴─────────┴─────────┘ │
+                       └──────────────────────────────────┘
+                                         │
+                                ┌────────▼────────┐
+                                │ MySQL Database  │
+                                │   (TypeORM)     │
+                                └─────────────────┘
+```
+
+### Final Architecture With Frontend
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   API Gateway    │    │  Media Server   │
-│   (React+TS)    │◄──►│   (NestJS+TS)    │◄──►│   (Janus Alt)   │
+│   React + TS    │    │   NestJS API     │    │  Media Services │
+│   Frontend      │◄──►│   Gateway        │◄──►│  (WebRTC SFU)   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                  │
                     ┌────────────┼───────────┐
                     │            │           │
             ┌───────▼───┐ ┌──────▼───┐ ┌─────▼─────┐
-            │ Socket.io │ │ Database │ │  Cache/   │
-            │ Service   │ │ Services │ │ Analytics │
+            │ Socket.io │ │ Database │ │   Redis   │
+            │  Gateway  │ │ Services │ │  Cache    │
             └───────────┘ └──────────┘ └───────────┘
 ```
 
-### Service Breakdown
+## Implementation Details
 
-#### API Gateway Service (NestJS + TypeScript)
+### Current Module Structure
 
 ```
-// Core modules structure
 src/
-├── auth/           # JWT authentication
-├── users/          # User management
-├── rooms/          # Video room management
-├── chat/           # Chat message handling
-├── websocket/      # Socket.io gateway
-├── analytics/      # Call metrics
-└── common/         # Shared utilities
-
+├── auth/              # ✅ JWT authentication & WebSocket guards
+│   ├── auth.service.ts
+│   ├── auth.controller.ts
+│   └── ws-auth.guard.ts
+├── users/             # ✅ User entity and management
+├── rooms/             # ✅ Video room management with participants
+│   ├── rooms.service.ts
+│   └── entities/room.entity.ts
+├── messages/          # ✅ Real-time chat with DTO validation
+│   ├── messages.service.ts
+│   ├── entities/message.entity.ts
+│   └── dto/
+│       ├── create-message.dto.ts
+│       └── load-message-history.dto.ts
+├── video/             # 🚧 WebRTC signaling (in progress)
+│   └── video.gateway.ts
+└── common/            # ✅ Shared utilities and guards
 ```
 
-#### Database Layer (TypeORM)
+### Database Schema (TypeORM)
 
 ```
-// Entity relationships
 User ──┐
-       ├─► Room (many-to-many)
-       └─► ChatMessage (one-to-many)
-
+       ├─► Room (many-to-many participants)
+       └─► Message (one-to-many sender)
 Room ──┐
-       ├─► ChatMessage (one-to-many)
-       └─► CallSession (one-to-many)
-
+       ├─► Message (one-to-many room)
+       └─► CallSession (one-to-many, planned)
 ```
 
-#### Real-time Communication (Socket.io + WebRTC)
+### WebSocket Events (Implemented)
 
-```
-// WebSocket event handlers
-- 'join_room' → Room management
-- 'leave_room' → Cleanup connections
-- 'webrtc_offer' → Peer connection signaling
-- 'webrtc_answer' → Response handling
-- 'ice_candidate' → Network traversal
-- 'chat_message' → Text messaging
+```typescript
+// Authentication & Room Management
+✅ 'joinRoom' → Room participation with database sync
+✅ 'leaveRoom' → Clean disconnection and state update
+✅ 'participantsUpdate' → Real-time presence broadcasting
 
+// Real-Time Chat
+✅ 'sendMessage' → DTO-validated message creation
+✅ 'newMessage' → Real-time message broadcasting
+✅ 'loadMessageHistory' → Persistent chat history
+✅ 'messageError' → Validation error feedback
+
+// WebRTC Signaling (Planned)
+🚧 'webrtc-offer' → Peer connection initiation
+🚧 'webrtc-answer' → Connection response handling
+🚧 'ice-candidate' → Network traversal coordination
 ```
+
+## Testing & Validation
+
+### Testing Approach
+
+- ✅ Multi-user scenarios: Different users in same room
+- ✅ Authentication flow: JWT token generation and WebSocket auth
+- ✅ Real-time updates: Message broadcasting and participant management
+- ✅ DTO validation: Client and server-side input validation
+- ✅ Error handling: Graceful failure scenarios and user feedback
+
+## Next Steps
+
+### P0. Immediate
+
+1. Implement WebRTC signaling handlers in VideoGateway
+2. Add peer connection management for 1-on-1 calls
+3. Integrate getUserMedia() for camera/microphone access
+4. Handle ICE candidate exchange and connection states
+5. Test video calls between two clients
+
+### P1. Short-term: Frontend
+
+1. Scaffold React + TypeScript project structure
+2. Implement shared DTO types between frontend and backend
+3. Create authentication flow and protected routes
+4. Build chat interface components with real-time updates
+5. Integrate WebRTC functionality into React components
+
+### P2. Long-term: Production Features
+
+1. Multi-party video calls with SFU architecture
+2. Redis integration for scalable session management
+3. MongoDB for rich message content and file attachments
+4. ElasticSearch for chat history search capabilities
+5. Docker containerization and cloud deployment
