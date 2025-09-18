@@ -1,0 +1,570 @@
+<!doctype html>
+<html>
+  <head>
+    <title>MiniMeet Chat Test - DTO Enhanced</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .controls {
+        background: #f0f0f0;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .status {
+        background: #e8f5e8;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .error {
+        background: #ffeaea;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .chat-container {
+        display: flex;
+        gap: 20px;
+      }
+      .participants {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        width: 300px;
+      }
+      .chat-area {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .messages {
+        height: 400px;
+        overflow-y: scroll;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background: white;
+        margin-bottom: 10px;
+      }
+      .message {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 5px;
+        background: #f1f1f1;
+      }
+      .message .sender {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .message .timestamp {
+        font-size: 0.8em;
+        color: #666;
+      }
+      .message-input-container {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+      }
+      .message-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        resize: none;
+      }
+      .message-input.invalid {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+      }
+      .message-input.valid {
+        border-color: #28a745;
+        background-color: #f8fff8;
+      }
+      .char-counter {
+        font-size: 0.8em;
+        margin-top: 5px;
+        text-align: right;
+      }
+      .char-counter.warning {
+        color: #ffc107;
+      }
+      .char-counter.danger {
+        color: #dc3545;
+      }
+      .char-counter.normal {
+        color: #6c757d;
+      }
+      input,
+      button {
+        margin: 5px;
+        padding: 8px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        min-width: 80px;
+      }
+      button:hover:not(:disabled) {
+        background: #0056b3;
+      }
+      button:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .validation-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎥💬 MiniMeet Chat Test - DTO Enhanced</h1>
+
+      <div class="validation-info">
+        <strong>DTO Validation Features:</strong>
+        <ul>
+          <li>Message content: 1-500 characters required</li>
+          <li>Client-side validation with real-time feedback</li>
+          <li>Server-side DTO validation with detailed error messages</li>
+          <li>Auto-disabled send button for invalid input</li>
+        </ul>
+      </div>
+
+      <div class="controls">
+        <h3>1. Get Authentication Token</h3>
+        <input
+          id="userId"
+          type="text"
+          placeholder="Enter User ID"
+          style="width: 300px"
+        />
+        <button onclick="getToken()">Get Token</button>
+        <div
+          id="tokenDisplay"
+          style="
+            margin-top: 10px;
+            font-family: monospace;
+            word-break: break-all;
+          "
+        ></div>
+      </div>
+
+      <div class="controls">
+        <h3>2. Connect & Join Room</h3>
+        <button onclick="connect()">Connect to Server</button>
+        <input
+          id="roomId"
+          type="text"
+          placeholder="Enter Room ID"
+          style="width: 300px"
+        />
+        <button onclick="joinRoom()">Join Room</button>
+        <button onclick="leaveRoom()">Leave Room</button>
+      </div>
+
+      <div id="status" class="status">Not connected</div>
+      <div id="error" class="error" style="display: none"></div>
+
+      <div class="chat-container">
+        <div class="participants">
+          <h3>Room Participants:</h3>
+          <div id="participants">No participants</div>
+        </div>
+
+        <div class="chat-area">
+          <h3>Chat Messages:</h3>
+          <div id="messages" class="messages"></div>
+          <div class="message-input-container">
+            <textarea
+              id="messageInput"
+              class="message-input"
+              placeholder="Type your message... (1-500 characters)"
+              rows="2"
+              maxlength="500"
+              oninput="validateMessageInput()"
+              onkeypress="handleMessageKeyPress(event)"
+            ></textarea>
+            <button id="sendButton" onclick="sendMessage()" disabled>
+              Send
+            </button>
+          </div>
+          <div id="charCounter" class="char-counter normal">0/500</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px">
+        <h3>Console Logs:</h3>
+        <div
+          id="logs"
+          style="
+            height: 200px;
+            overflow-y: scroll;
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+      let socket;
+      let authToken = '';
+      let currentRoomId = '';
+
+      function log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logDiv = document.getElementById('logs');
+        logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(message);
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById('error');
+        errorDiv.innerHTML = `<strong>Error:</strong> ${message}`;
+        errorDiv.style.display = 'block';
+        setTimeout(() => (errorDiv.style.display = 'none'), 8000);
+      }
+
+      function updateStatus(message) {
+        document.getElementById('status').textContent = message;
+      }
+
+      function validateMessageInput() {
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const charCounter = document.getElementById('charCounter');
+
+        const content = messageInput.value;
+        const length = content.length;
+        const trimmedLength = content.trim().length;
+
+        // Update character counter
+        charCounter.textContent = `${length}/500`;
+
+        // Update counter color based on length
+        charCounter.className = 'char-counter ';
+        if (length > 450) {
+          charCounter.className += 'danger';
+        } else if (length > 350) {
+          charCounter.className += 'warning';
+        } else {
+          charCounter.className += 'normal';
+        }
+
+        // Validate input
+        const isValid =
+          trimmedLength >= 1 && trimmedLength <= 500 && currentRoomId;
+
+        // Update input styling
+        messageInput.className = 'message-input';
+        if (content.length > 0) {
+          messageInput.className += isValid ? ' valid' : ' invalid';
+        }
+
+        // Enable/disable send button
+        sendButton.disabled = !isValid;
+
+        return isValid;
+      }
+
+      async function getToken() {
+        const userId = document.getElementById('userId').value.trim();
+        if (!userId) {
+          showError('Please enter a User ID');
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3001/auth/token/${userId}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to get token: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          authToken = data.access_token;
+
+          document.getElementById('tokenDisplay').innerHTML =
+            `<strong>Token:</strong> ${authToken.substring(0, 50)}...`;
+
+          log(`✅ Token obtained for user ${userId}`);
+        } catch (error) {
+          log(`❌ Token error: ${error.message}`);
+          showError(error.message);
+        }
+      }
+
+      function connect() {
+        if (!authToken) {
+          showError('Please get a token first');
+          return;
+        }
+
+        if (socket) socket.disconnect();
+
+        socket = io('http://localhost:3001', {
+          auth: { token: authToken },
+        });
+
+        socket.on('connect', () => {
+          log(`✅ Connected! Socket ID: ${socket.id}`);
+          updateStatus(`Connected and authenticated`);
+        });
+
+        socket.on('connectionSuccess', (data) => {
+          log(`🎉 ${data.message}`);
+        });
+
+        socket.on('disconnect', () => {
+          log('❌ Disconnected from server');
+          updateStatus('Disconnected');
+          currentRoomId = '';
+          validateMessageInput(); // Update send button state
+        });
+
+        socket.on('authError', (data) => {
+          log(`🔒 Auth error: ${data.message}`);
+          showError(`Authentication failed: ${data.message}`);
+        });
+
+        // Room events
+        socket.on('joinRoomSuccess', (data) => {
+          log(`✅ Successfully joined room: ${data.roomId}`);
+          currentRoomId = data.roomId;
+          validateMessageInput(); // Update send button state
+          loadMessageHistory();
+        });
+
+        socket.on('leaveRoomSuccess', (data) => {
+          log(`✅ Successfully left room: ${data.roomId}`);
+          currentRoomId = '';
+          validateMessageInput(); // Update send button state
+          clearMessages();
+        });
+
+        socket.on('participantsUpdate', (data) => {
+          log(`👥 Participants update: ${data.participants.length} users`);
+          displayParticipants(data.participants);
+        });
+
+        // Enhanced chat events with DTO validation feedback
+        socket.on('newMessage', (data) => {
+          log(`💬 New message from ${data.sender.username}`);
+          displayMessage(data);
+        });
+
+        socket.on('messageHistory', (data) => {
+          log(`📜 Loaded ${data.messages.length} previous messages`);
+          displayMessageHistory(data.messages);
+        });
+
+        socket.on('messageSent', (data) => {
+          log(`✅ Message sent: ${data.messageId}`);
+        });
+
+        // Enhanced error handling for DTO validation
+        socket.on('messageError', (data) => {
+          log(`❌ Message error: ${data.error}`);
+
+          // Enhanced error messages based on DTO validation
+          let userMessage = data.error;
+          if (data.error.includes('too long')) {
+            userMessage =
+              'Message is too long (max 500 characters). Please shorten it.';
+          } else if (
+            data.error.includes('empty') ||
+            data.error.includes('too short')
+          ) {
+            userMessage = 'Message cannot be empty. Please enter some text.';
+          } else if (data.error.includes('must be a string')) {
+            userMessage = 'Message must be valid text.';
+          } else if (data.error.includes('Room ID')) {
+            userMessage = 'Invalid room. Please join a room first.';
+          }
+
+          showError(userMessage);
+        });
+      }
+
+      function joinRoom() {
+        if (!socket || !socket.connected) {
+          showError('Please connect first');
+          return;
+        }
+
+        const roomId = document.getElementById('roomId').value.trim();
+        if (!roomId) {
+          showError('Please enter a Room ID');
+          return;
+        }
+
+        log(`📤 Joining room: ${roomId}`);
+        socket.emit('joinRoom', { roomId });
+      }
+
+      function leaveRoom() {
+        if (!socket || !socket.connected) {
+          showError('Please connect first');
+          return;
+        }
+
+        if (!currentRoomId) {
+          showError('Not in any room');
+          return;
+        }
+
+        log(`📤 Leaving room: ${currentRoomId}`);
+        socket.emit('leaveRoom', { roomId: currentRoomId });
+      }
+
+      function loadMessageHistory() {
+        if (currentRoomId) {
+          // Send DTO-compliant payload
+          const historyDto = {
+            roomId: currentRoomId,
+            limit: 50,
+          };
+
+          log(
+            `📤 Loading message history: roomId=${historyDto.roomId}, limit=${historyDto.limit}`,
+          );
+          socket.emit('loadMessageHistory', historyDto);
+        }
+      }
+
+      function sendMessage() {
+        if (!socket || !socket.connected) {
+          showError('Please connect first');
+          return;
+        }
+
+        if (!currentRoomId) {
+          showError('Please join a room first');
+          return;
+        }
+
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+
+        // Client-side DTO validation
+        if (!content) {
+          showError('Message cannot be empty');
+          return;
+        }
+
+        if (content.length > 500) {
+          showError('Message too long (max 500 characters)');
+          return;
+        }
+
+        if (content.length < 1) {
+          showError('Message too short (min 1 character)');
+          return;
+        }
+
+        // Create DTO-compliant payload
+        const messageDto = {
+          content: content,
+          roomId: currentRoomId,
+        };
+
+        log(
+          `📤 Sending message DTO: content="${content.substring(0, 50)}${content.length > 50 ? '...' : ''}", roomId=${currentRoomId}`,
+        );
+        socket.emit('sendMessage', messageDto);
+
+        // Clear input and reset validation
+        messageInput.value = '';
+        validateMessageInput();
+      }
+
+      function handleMessageKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          if (!document.getElementById('sendButton').disabled) {
+            sendMessage();
+          }
+        }
+      }
+
+      function displayParticipants(participants) {
+        const participantsDiv = document.getElementById('participants');
+
+        if (!participants || participants.length === 0) {
+          participantsDiv.innerHTML = '<em>No participants</em>';
+          return;
+        }
+
+        participantsDiv.innerHTML = participants
+          .map(
+            (p) =>
+              `<div style="padding: 5px; border-bottom: 1px solid #ddd;">
+                👤 <strong>${p.username}</strong><br>
+                <small>${p.email}</small><br>
+                <small style="color: #666;">ID: ${p.id.substring(0, 8)}...</small>
+              </div>`,
+          )
+          .join('');
+      }
+
+      function displayMessage(messageData) {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+
+        messageElement.innerHTML = `
+          <div class="sender">${messageData.sender.username}</div>
+          <div>${messageData.content}</div>
+          <div class="timestamp">${new Date(messageData.timestamp).toLocaleTimeString()}</div>
+        `;
+
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      function displayMessageHistory(messages) {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = '';
+
+        messages.forEach((message) => {
+          displayMessage(message);
+        });
+      }
+
+      function clearMessages() {
+        document.getElementById('messages').innerHTML = '<em>No messages</em>';
+      }
+
+      // Initialize validation on page load
+      document.addEventListener('DOMContentLoaded', function () {
+        validateMessageInput();
+      });
+    </script>
+  </body>
+</html>

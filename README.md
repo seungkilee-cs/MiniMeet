@@ -16,13 +16,15 @@ To Build a Functioning Prototype of Real Time Video Chat Application using speci
 - API Consistency Problem: "How do we provide predictable, type-safe interfaces for frontend consumption?"
 - Architecture Scalability Problem: "How do we build modular code that won't become unmaintainable?"
 
+MongoDB is likely used for the chat message, where the message entity itself can include various forms that includes attachments, images, videos, etc. For now, focus on building POC with SQL but add DTO on the message side to make this flexible and expandable later.
+
 #### Deliverables
 
+- [x] Room creation and management with participant tracking
+- [x] RESTful API endpoints that frontend can consume
+- [x] Database relationships that support complex real-time interactions
+- [x] Error handling and validation
 - [ ] Validated user registration/authentication system
-- [ ] Room creation and management with participant tracking
-- [ ] RESTful API endpoints that frontend can consume
-- [ ] Database relationships that support complex real-time interactions
-- [ ] Error handling and validation
 
 ### 2. Real-Time Communication Backend
 
@@ -44,9 +46,9 @@ To Build a Functioning Prototype of Real Time Video Chat Application using speci
 
 ### Technology Stack
 
-#### As Is
+#### Core Functionality
 
-`Nestjs, Typescript, TypeOrm, Socket.io, WebRTC, Peerjs`
+`Nestjs, Typescript, TypeOrm, Socket.io, WebRTC`
 
 #### Alternative
 
