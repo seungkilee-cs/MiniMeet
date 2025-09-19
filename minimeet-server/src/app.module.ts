@@ -16,11 +16,11 @@ import { MessagesModule } from './messages/messages.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST || 'localhost',
       port: 3306,
-      username: 'root',
-      password: 'password',
-      database: 'minimeet',
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || 'password',
+      database: process.env.DB_NAME || 'minimeet',
       autoLoadEntities: true,
       synchronize: true, // Only for development
       logging: true, // Shows SQL queries in console
