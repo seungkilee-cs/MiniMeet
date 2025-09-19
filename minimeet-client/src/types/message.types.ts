@@ -23,9 +23,30 @@ export interface Message {
 export interface Room {
   id: string;
   name: string;
-  participants: Array<{
-    id: string;
-    username: string;
-    email: string;
-  }>;
+  participants: User[];
+}
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+}
+
+export interface JoinRoomSuccessData {
+  roomId: string;
+  message: string;
+}
+
+export interface ParticipantsUpdateData {
+  roomId: string;
+  participants: User[];
+}
+
+export interface MessageHistoryData {
+  roomId: string;
+  messages: Message[];
+}
+
+export interface MessageErrorData {
+  error: string;
 }

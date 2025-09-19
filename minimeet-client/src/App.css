@@ -1,38 +1,80 @@
-.App {
-  text-align: center;
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  padding: 20px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.controls {
+  background: #f0f0f0;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.validation-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-size: 0.9em;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.status {
+  background: #e8f5e8;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+.error {
+  background: #ffeaea;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+.chat-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 20px;
+}
+
+.chat-area {
+  flex: 1;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.token-display {
+  margin-top: 10px;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+button {
+  margin: 5px;
+  padding: 8px;
+  background: #007bff;
   color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  min-width: 80px;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover:not(:disabled) {
+  background: #0056b3;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input {
+  margin: 5px;
+  padding: 8px;
 }
