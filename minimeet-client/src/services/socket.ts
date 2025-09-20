@@ -6,7 +6,7 @@ import {
 } from "../types/message.types";
 
 class SocketService {
-  private socket: Socket | null = null;
+  public socket: Socket | null = null;
 
   connect(token: string): Socket {
     this.socket = io(
@@ -45,6 +45,23 @@ class SocketService {
 
   onJoinSuccess(callback: (data: { roomId: string; message: string }) => void) {
     this.socket?.on("joinRoomSuccess", callback);
+  }
+
+  // Missing leave room success handler
+  onLeaveSuccess(
+    callback: (data: { roomId: string; message: string }) => void,
+  ) {
+    this.socket?.on("leaveRoomSuccess", callback);
+  }
+
+  // Join room error handler
+  onJoinError(callback: (data: { roomId: string; error: string }) => void) {
+    this.socket?.on("joinRoomError", callback);
+  }
+
+  // Leave room error handler
+  onLeaveError(callback: (data: { roomId: string; error: string }) => void) {
+    this.socket?.on("leaveRoomError", callback);
   }
 
   onParticipantsUpdate(

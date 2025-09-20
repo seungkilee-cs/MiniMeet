@@ -130,3 +130,5 @@ pids
 # TernJS port file
 .tern-port
 
+_legacy/
+_legacy/*

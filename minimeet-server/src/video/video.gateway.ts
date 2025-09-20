@@ -77,7 +77,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = client.data.user;
     const { roomId } = data;
+
     this.logger.log(`User ${user.id} attempting to join room ${roomId}`);
+
     if (!user || !user.id) {
       this.logger.error('Join room attempted by unauthenticated user');
       client.emit('joinRoomError', {
@@ -86,25 +88,34 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       return;
     }
-    this.logger.log(`User from socket: ${user}`);
+
     try {
-      client.join(roomId);
-      this.logger.log(`✅ Socket ${client.id} joined Socket.IO room ${roomId}`);
+      // 1. Add user to database first
       const updatedRoom = await this.roomsService.addUserToRoom(
         roomId,
         user.id,
       );
       this.logger.log(`✅ User ${user.id} added to room ${roomId} in database`);
-      this.server.to(roomId).emit('participantsUpdate', {
-        roomId,
-        participants: updatedRoom.participants,
-      });
-      this.logger.log(`✅ Broadcast participant update to room ${roomId}`);
+
+      // 2. Then join socket room
+      client.join(roomId);
+      this.logger.log(`✅ Socket ${client.id} joined Socket.IO room ${roomId}`);
+
+      // 3. Send success to the joining client FIRST
       client.emit('joinRoomSuccess', {
         roomId,
         message: `Successfully joined room ${updatedRoom.name}`,
       });
       this.logger.log(`✅ Sent joinRoomSuccess to client ${client.id}`);
+
+      // 4. THEN broadcast to ALL room members (including the new joiner)
+      this.server.to(roomId).emit('participantsUpdate', {
+        roomId,
+        participants: updatedRoom.participants,
+      });
+      this.logger.log(
+        `✅ Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} participants)`,
+      );
     } catch (error) {
       this.logger.error(`❌ Error joining room: ${error.message}`);
       this.logger.error(`❌ Stack trace: ${error.stack}`);
@@ -122,12 +133,16 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = client.data.user;
     const { roomId } = data;
+
     if (!user) {
       this.logger.error('Leave room attempted by unauthenticated user');
       return;
     }
+
     this.logger.log(`User ${user.username} attempting to leave room ${roomId}`);
+
     try {
+      // 1. Remove from database first
       const updatedRoom = await this.roomsService.removeUserFromRoom(
         roomId,
         user.id,
@@ -135,17 +150,25 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(
         `✅ User ${user.username} removed from room ${roomId} in database`,
       );
-      this.server.to(roomId).emit('participantsUpdate', {
-        roomId,
-        participants: updatedRoom.participants,
-      });
-      this.logger.log(`✅ Broadcast participant update to room ${roomId}`);
-      client.leave(roomId);
-      this.logger.log(`✅ Socket ${client.id} left Socket.IO room ${roomId}`);
+
+      // 2. Send success to the leaving client FIRST (while still in room)
       client.emit('leaveRoomSuccess', {
         roomId,
         message: `Successfully left room ${updatedRoom.name}`,
       });
+
+      // 3. Leave socket room
+      client.leave(roomId);
+      this.logger.log(`✅ Socket ${client.id} left Socket.IO room ${roomId}`);
+
+      // 4. THEN broadcast updated participants to remaining members
+      this.server.to(roomId).emit('participantsUpdate', {
+        roomId,
+        participants: updatedRoom.participants,
+      });
+      this.logger.log(
+        `✅ Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} remaining)`,
+      );
     } catch (error) {
       this.logger.error(`❌ Error leaving room: ${error.message}`);
       client.emit('leaveRoomError', {
@@ -154,7 +177,6 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
   }
-
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,

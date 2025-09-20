@@ -1,5 +1,4 @@
-// src/App.tsx
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { apiClient } from "./services/api";
 import { socketService } from "./services/socket";
 import ChatRoom from "./components/ChatRoom";
@@ -19,17 +18,18 @@ const App: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [logs, setLogs] = useState<string[]>([]);
 
-  const addLog = (message: string) => {
+  // Use useCallback to memoize these functions
+  const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
     setLogs((prev) => [...prev, logMessage]);
     console.log(logMessage);
-  };
+  }, []);
 
-  const showError = (message: string) => {
+  const showError = useCallback((message: string) => {
     setError(message);
     setTimeout(() => setError(""), 8000);
-  };
+  }, []);
 
   const handleGetToken = async () => {
     if (!userId.trim()) {
@@ -127,7 +127,7 @@ const App: React.FC = () => {
 
   return (
     <div className="container">
-      <h1> MiniMeet Chat </h1>
+      <h1> MiniMeet Chat - React + TypeScript</h1>
 
       <AuthSection
         userId={userId}

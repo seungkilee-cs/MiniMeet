@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { socketService } from "../services/socket";
 import { Message, User, CreateMessageDto } from "../types/message.types";
+import "../style/ChatRoom.css";
 
 interface ChatRoomProps {
   roomId: string;
-  onLog: (message: string) => void; // ← Add this prop
-  onError: (error: string) => void; // ← Add this prop
+  onLog: (message: string) => void;
+  onError: (error: string) => void;
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
@@ -13,32 +14,60 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
   const [participants, setParticipants] = useState<User[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
 
+  // Separate effect for setting up event listeners (run once)
   useEffect(() => {
-    // Set up socket event listeners
-    socketService.onNewMessage((message) => {
+    // Set up socket event listeners ONCE
+    const handleNewMessage = (message: Message) => {
       onLog(`💬 New message from ${message.sender.username}`);
       setMessages((prev) => [...prev, message]);
-    });
+    };
 
-    socketService.onParticipantsUpdate((data) => {
+    const handleParticipantsUpdate = (data: {
+      roomId: string;
+      participants: User[];
+    }) => {
       onLog(`👥 Participants update: ${data.participants.length} users`);
       setParticipants(data.participants);
-    });
+    };
 
-    socketService.onMessageHistory((data) => {
+    const handleMessageHistory = (data: {
+      roomId: string;
+      messages: Message[];
+    }) => {
       onLog(`📜 Loaded ${data.messages.length} previous messages`);
       setMessages(data.messages);
-    });
+    };
 
-    // Load message history when room changes
-    socketService.loadMessageHistory({ roomId, limit: 50 });
+    // Register listeners
+    socketService.onNewMessage(handleNewMessage);
+    socketService.onParticipantsUpdate(handleParticipantsUpdate);
+    socketService.onMessageHistory(handleMessageHistory);
 
-    // Cleanup on unmount
+    // Cleanup function to remove listeners
     return () => {
+      // Remove event listeners to prevent duplicates
+      if (socketService.socket) {
+        socketService.socket.off("newMessage", handleNewMessage);
+        socketService.socket.off(
+          "participantsUpdate",
+          handleParticipantsUpdate,
+        );
+        socketService.socket.off("messageHistory", handleMessageHistory);
+      }
+    };
+  }, []); // Empty dependency array - run only once
+
+  // Separate effect for loading data when room changes
+  useEffect(() => {
+    if (roomId) {
+      // Clear previous room data
       setMessages([]);
       setParticipants([]);
-    };
-  }, [roomId, onLog]);
+
+      // Load message history for new room
+      socketService.loadMessageHistory({ roomId, limit: 50 });
+    }
+  }, [roomId]); // Only depends on roomId
 
   const handleSendMessage = () => {
     const content = messageInput.trim();
@@ -70,24 +99,26 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
   return (
     <div className="chat-container">
       {/* Participants Section */}
-      <div className="participants">
-        <h3>Room Participants:</h3>
-        <div>
+      <div className="participants-section">
+        <h3 className="section-title">Room Participants:</h3>
+        <div className="participants-list">
           {participants.length === 0 ? (
-            <em>No participants</em>
+            <em className="empty-state">No participants</em>
           ) : (
-            participants.map((p) => (
-              <div
-                key={p.id}
-                style={{ padding: "5px", borderBottom: "1px solid #ddd" }}
-              >
-                👤 <strong>{p.username}</strong>
-                <br />
-                <small>{p.email}</small>
-                <br />
-                <small style={{ color: "#666" }}>
-                  ID: {p.id.substring(0, 8)}...
-                </small>
+            participants.map((participant) => (
+              <div key={participant.id} className="participant-item">
+                <div className="participant-avatar">👤</div>
+                <div className="participant-info">
+                  <strong className="participant-name">
+                    {participant.username}
+                  </strong>
+                  <small className="participant-email">
+                    {participant.email}
+                  </small>
+                  <small className="participant-id">
+                    ID: {participant.id.substring(0, 8)}...
+                  </small>
+                </div>
               </div>
             ))
           )}
@@ -96,37 +127,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
 
       {/* Chat Area */}
       <div className="chat-area">
-        <h3>Chat Messages:</h3>
-        <div
-          className="messages"
-          style={{
-            height: "400px",
-            overflowY: "scroll",
-            border: "1px solid #ddd",
-            padding: "10px",
-            background: "white",
-            marginBottom: "10px",
-          }}
-        >
+        <h3 className="section-title">Chat Messages:</h3>
+
+        <div className="messages-container">
           {messages.length === 0 ? (
-            <em>No messages</em>
+            <em className="empty-state">No messages</em>
           ) : (
             messages.map((message) => (
-              <div
-                key={message.id}
-                className="message"
-                style={{
-                  marginBottom: "10px",
-                  padding: "8px",
-                  borderRadius: "5px",
-                  background: "#f1f1f1",
-                }}
-              >
-                <div style={{ fontWeight: "bold", color: "#007bff" }}>
-                  {message.sender.username}
-                </div>
-                <div>{message.content}</div>
-                <div style={{ fontSize: "0.8em", color: "#666" }}>
+              <div key={message.id} className="message-item">
+                <div className="message-sender">{message.sender.username}</div>
+                <div className="message-content">{message.content}</div>
+                <div className="message-timestamp">
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </div>
               </div>
@@ -135,7 +146,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
         </div>
 
         {/* Message Input */}
-        <div style={{ display: "flex", gap: "10px", alignItems: "stretch" }}>
+        <div className="message-input-container">
           <textarea
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
@@ -143,33 +154,19 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
             placeholder="Type your message... (1-500 characters)"
             rows={2}
             maxLength={500}
-            style={{
-              flex: 1,
-              padding: "10px",
-              border: "1px solid #ddd",
-              borderRadius: "3px",
-              resize: "none",
-            }}
+            className="message-textarea"
           />
           <button
             onClick={handleSendMessage}
             disabled={!messageInput.trim() || messageInput.length > 500}
+            className="send-button"
           >
             Send
           </button>
         </div>
 
         {/* Character Counter */}
-        <div
-          style={{
-            fontSize: "0.8em",
-            marginTop: "5px",
-            textAlign: "right",
-            color: "#6c757d",
-          }}
-        >
-          {messageInput.length}/500
-        </div>
+        <div className="character-counter">{messageInput.length}/500</div>
       </div>
     </div>
   );
