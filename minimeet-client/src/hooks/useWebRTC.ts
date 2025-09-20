@@ -62,15 +62,17 @@ export const useWebRTC = ({
   // Acquire camera/microphone
   const ensureLocalMedia = useCallback(async (): Promise<MediaStream> => {
     if (state.localStream) return state.localStream;
+
     try {
-      onLog("🎥 Requesting camera and microphone...");
+      onLog(" Requesting camera and microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
+
       if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       setState((prev) => ({ ...prev, localStream: stream }));
-      onLog("✅ Camera and microphone granted");
+      onLog(" Camera and microphone granted");
       return stream;
     } catch (e: any) {
       onError(`Failed to get user media: ${e.message}`);
@@ -95,7 +97,7 @@ export const useWebRTC = ({
             toUserId: state.connectedUserId,
             roomId,
           });
-          onLog("🧊 Sent ICE candidate");
+          onLog(" Sent ICE candidate");
         } catch (e: any) {
           onError(`Failed to send ICE candidate: ${e.message}`);
         }
@@ -106,11 +108,11 @@ export const useWebRTC = ({
       const rStream = event.streams[0];
       setState((prev) => ({ ...prev, remoteStream: rStream }));
       if (remoteVideoRef.current) remoteVideoRef.current.srcObject = rStream;
-      onLog("📺 Remote track received");
+      onLog(" Remote track received");
     };
 
     pc.onconnectionstatechange = () => {
-      onLog(`🔗 PC state: ${pc.connectionState}`);
+      onLog(` PC state: ${pc.connectionState}`);
       if (
         pc.connectionState === "failed" ||
         pc.connectionState === "disconnected" ||
@@ -128,7 +130,7 @@ export const useWebRTC = ({
   const startCall = useCallback(
     async (targetUserId: string) => {
       try {
-        onLog(`📞 Starting call with user ${targetUserId}`);
+        onLog(` Starting call with user ${targetUserId}`);
         const stream = await ensureLocalMedia();
         const pc = createPeer();
 
@@ -155,7 +157,7 @@ export const useWebRTC = ({
           isCallActive: true,
           connectedUserId: targetUserId,
         }));
-        onLog("📤 Offer sent");
+        onLog(" Offer sent");
       } catch (e: any) {
         onError(`Failed to start call: ${e.message}`);
       }
@@ -165,7 +167,7 @@ export const useWebRTC = ({
 
   // End call and cleanup
   const endCall = useCallback(() => {
-    onLog("📞 Ending call");
+    onLog(" Ending call");
     try {
       if (peerConnectionRef.current) {
         peerConnectionRef.current.onicecandidate = null;
@@ -173,9 +175,11 @@ export const useWebRTC = ({
         peerConnectionRef.current.close();
         peerConnectionRef.current = null;
       }
+
       if (state.localStream) {
         state.localStream.getTracks().forEach((t) => t.stop());
       }
+
       if (localVideoRef.current) localVideoRef.current.srcObject = null;
       if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
@@ -202,17 +206,19 @@ export const useWebRTC = ({
   const toggleVideo = useCallback(() => {
     const track = state.localStream?.getVideoTracks()?.[0];
     if (!track) return;
+
     track.enabled = !track.enabled;
     setState((prev) => ({ ...prev, isLocalVideoEnabled: track.enabled }));
-    onLog(track.enabled ? "📹 Video enabled" : "📹 Video disabled");
+    onLog(track.enabled ? " Video enabled" : " Video disabled");
   }, [state.localStream, onLog]);
 
   const toggleAudio = useCallback(() => {
     const track = state.localStream?.getAudioTracks()?.[0];
     if (!track) return;
+
     track.enabled = !track.enabled;
     setState((prev) => ({ ...prev, isLocalAudioEnabled: track.enabled }));
-    onLog(track.enabled ? "🎙️ Audio unmuted" : "🎙️ Audio muted");
+    onLog(track.enabled ? " Audio unmuted" : " Audio muted");
   }, [state.localStream, onLog]);
 
   // Incoming signaling handlers
@@ -229,8 +235,9 @@ export const useWebRTC = ({
       roomId: string;
     }) => {
       if (data.toUserId !== localUserId) return;
+
       try {
-        onLog("📥 Offer received");
+        onLog(" Offer received");
         const stream = await ensureLocalMedia();
         const pc = createPeer();
 
@@ -256,7 +263,7 @@ export const useWebRTC = ({
           isCallActive: true,
           connectedUserId: data.fromUserId,
         }));
-        onLog("📤 Answer sent");
+        onLog(" Answer sent");
       } catch (e: any) {
         onError(`Failed to handle offer: ${e.message}`);
       }
@@ -272,10 +279,11 @@ export const useWebRTC = ({
       if (data.toUserId !== localUserId) return;
       const pc = peerConnectionRef.current;
       if (!pc) return;
+
       try {
-        onLog("📥 Answer received");
+        onLog(" Answer received");
         await pc.setRemoteDescription({ type: "answer", sdp: data.sdp });
-        onLog("✅ Remote description set");
+        onLog(" Remote description set");
       } catch (e: any) {
         onError(`Failed to handle answer: ${e.message}`);
       }
@@ -293,6 +301,7 @@ export const useWebRTC = ({
       if (data.toUserId !== localUserId) return;
       const pc = peerConnectionRef.current;
       if (!pc) return;
+
       try {
         await pc.addIceCandidate({
           candidate: data.candidate,
@@ -300,7 +309,7 @@ export const useWebRTC = ({
           sdpMLineIndex:
             data.sdpMLineIndex === null ? undefined : data.sdpMLineIndex,
         });
-        onLog("🧊 ICE candidate added");
+        onLog(" ICE candidate added");
       } catch (e: any) {
         onError(`Failed to add ICE candidate: ${e.message}`);
       }
@@ -313,11 +322,11 @@ export const useWebRTC = ({
       roomId: string;
     }) => {
       if (data.toUserId !== localUserId) return;
-      onLog("📞 Remote ended the call");
+      onLog(" Remote ended the call");
       endCall();
     };
 
-    // Optional: soft “ringing” UX if emitted by caller
+    // Optional: soft "ringing" UX if emitted by caller
     const onIncomingCall = (data: {
       fromUserId: string;
       fromUsername: string;
@@ -332,7 +341,7 @@ export const useWebRTC = ({
           fromUsername: data.fromUsername,
         },
       }));
-      onLog(`📞 Incoming call from ${data.fromUsername}`);
+      onLog(` Incoming call from ${data.fromUsername}`);
     };
 
     s.on("webrtc-offer-received", onOffer);
@@ -369,7 +378,7 @@ export const useWebRTC = ({
           connectedUserId: fromUserId,
           isCallActive: true,
         }));
-        onLog(`📞 Accepting call from ${fromUserId}`);
+        onLog(` Accepting call from ${fromUserId}`);
       } catch (e: any) {
         onError(`Failed to accept call: ${e.message}`);
       }
@@ -379,6 +388,7 @@ export const useWebRTC = ({
 
   const rejectCall = useCallback(() => {
     if (!state.incomingCall) return;
+
     try {
       getSocket().emit("webrtc-answer-call", {
         fromUserId: state.incomingCall.fromUserId,
@@ -387,7 +397,7 @@ export const useWebRTC = ({
         accepted: false,
       });
       setState((prev) => ({ ...prev, incomingCall: null }));
-      onLog("❌ Call rejected");
+      onLog(" Call rejected");
     } catch (e: any) {
       onError(`Failed to reject call: ${e.message}`);
     }

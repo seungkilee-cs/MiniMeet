@@ -27,41 +27,43 @@ const VideoChat: React.FC<VideoChatProps> = ({
   const otherParticipants = participants.filter((p) => p.id !== currentUserId);
 
   return (
-    <div
-      style={{ padding: "20px", border: "1px solid #ccc", margin: "20px 0" }}
-    >
-      <h3>🎥 Video Chat</h3>
+    <div className="video-chat">
+      <h2> Video Chat</h2>
 
       {/* Video Area */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
+      <div className="video-area">
         {/* Local Video */}
-        <div>
+        <div className="video-container">
           <h4>You</h4>
           <video
             ref={localVideoRef}
             autoPlay
             muted
             playsInline
-            style={{ width: "300px", height: "200px", background: "#000" }}
+            style={{ width: "300px", height: "200px", backgroundColor: "#000" }}
           />
         </div>
 
         {/* Remote Video */}
         {isCallActive && (
-          <div>
+          <div className="video-container">
             <h4>Remote User</h4>
             <video
               ref={remoteVideoRef}
               autoPlay
               playsInline
-              style={{ width: "300px", height: "200px", background: "#000" }}
+              style={{
+                width: "300px",
+                height: "200px",
+                backgroundColor: "#000",
+              }}
             />
           </div>
         )}
       </div>
 
       {/* Controls */}
-      <div>
+      <div className="video-controls">
         <h4>Available Participants:</h4>
         {otherParticipants.length > 0 ? (
           otherParticipants.map((participant) => (
@@ -71,7 +73,7 @@ const VideoChat: React.FC<VideoChatProps> = ({
                 onClick={() => startCall(participant.id)}
                 style={{ marginLeft: "10px", padding: "5px 15px" }}
               >
-                📞 Call
+                Call
               </button>
             </div>
           ))
