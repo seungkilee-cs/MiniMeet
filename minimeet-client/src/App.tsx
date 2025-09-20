@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { apiClient } from "./services/api";
 import { socketService } from "./services/socket";
 import ChatRoom from "./components/ChatRoom";
+import VideoChat from "./components/VideoChat";
 import AuthSection from "./components/AuthSection";
 import ConnectionSection from "./components/ConnectionSection";
 import StatusDisplay from "./components/StatusDisplay";
@@ -9,16 +10,23 @@ import ConsoleLog from "./components/ConsoleLog";
 import "./App.css";
 
 const App: React.FC = () => {
-  const [token, setToken] = useState<string>("");
-  const [userId, setUserId] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
-  const [currentRoomId, setCurrentRoomId] = useState<string>("");
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>("Not connected");
-  const [error, setError] = useState<string>("");
+  const [token, setToken] = useState("");
+  const [userId, setUserId] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [currentRoomId, setCurrentRoomId] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [status, setStatus] = useState("Not connected");
+  const [error, setError] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<
+    Array<{ id: string; username: string; email: string }>
+  >([]);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    username: string;
+  } | null>(null);
 
-  // Use useCallback to memoize these functions
+  // Use useCallback for stable references
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
@@ -59,6 +67,9 @@ const App: React.FC = () => {
       addLog(`✅ Connected! Socket ID: ${socket.id}`);
       setStatus("Connected and authenticated");
       setIsConnected(true);
+      // Store current user info (get from JWT or socket)
+      // FIX: fix later -> this is a placeholder - adapt based on the authentication if I ever finish the auth
+      setCurrentUser({ id: userId, username: userId });
     });
 
     socket.on("disconnect", () => {
@@ -73,10 +84,28 @@ const App: React.FC = () => {
       showError(`Authentication failed: ${data.message}`);
     });
 
-    // Room events
+    // Handle join room success
     socketService.onJoinSuccess((data) => {
       addLog(`✅ Successfully joined room: ${data.roomId}`);
       setCurrentRoomId(data.roomId);
+    });
+
+    // Handle leave room success - CLEAR THE ROOM
+    socketService.onLeaveSuccess((data) => {
+      addLog(`✅ Successfully left room: ${data.roomId}`);
+      setCurrentRoomId(""); // ← This clears the ChatRoom component
+    });
+
+    // Handle join room errors
+    socketService.onJoinError((data) => {
+      addLog(`❌ Failed to join room: ${data.error}`);
+      showError(`Failed to join room: ${data.error}`);
+    });
+
+    // Handle leave room errors
+    socketService.onLeaveError((data) => {
+      addLog(`❌ Failed to leave room: ${data.error}`);
+      showError(`Failed to leave room: ${data.error}`);
     });
 
     socketService.onMessageError((data) => {
@@ -92,6 +121,11 @@ const App: React.FC = () => {
         userMessage = "Message cannot be empty. Please enter some text.";
       }
       showError(userMessage);
+    });
+
+    socketService.onParticipantsUpdate((data) => {
+      setParticipants(data.participants);
+      addLog(`👥 Participants update: ${data.participants.length} users`);
     });
   };
 
@@ -126,32 +160,50 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <h1> MiniMeet Chat - React + TypeScript</h1>
+    <div className="app">
+      <header className="app-header">
+        <h1> MiniMeet Chat - React + TypeScript</h1>
+      </header>
 
-      <AuthSection
-        userId={userId}
-        onUserIdChange={setUserId}
-        onGetToken={handleGetToken}
-        token={token}
-      />
+      <main className="app-main">
+        <AuthSection
+          userId={userId}
+          token={token}
+          onUserIdChange={setUserId}
+          onGetToken={handleGetToken}
+        />
 
-      <ConnectionSection
-        onConnect={handleConnect}
-        roomId={roomId}
-        onRoomIdChange={setRoomId}
-        onJoinRoom={handleJoinRoom}
-        onLeaveRoom={handleLeaveRoom}
-        isConnected={isConnected}
-      />
+        <ConnectionSection
+          isConnected={isConnected}
+          roomId={roomId}
+          onRoomIdChange={setRoomId}
+          onConnect={handleConnect}
+          onJoinRoom={handleJoinRoom}
+          onLeaveRoom={handleLeaveRoom}
+        />
 
-      <StatusDisplay status={status} error={error} />
+        <StatusDisplay status={status} error={error} />
 
-      {currentRoomId && (
-        <ChatRoom roomId={currentRoomId} onLog={addLog} onError={showError} />
-      )}
+        {currentRoomId && currentUser && (
+          <>
+            <ChatRoom
+              roomId={currentRoomId}
+              currentUserId={currentUser.id}
+              onLog={addLog}
+              onError={showError}
+            />
+            <VideoChat
+              roomId={currentRoomId}
+              currentUserId={currentUser.id}
+              participants={participants}
+              onLog={addLog}
+              onError={showError}
+            />
+          </>
+        )}
 
-      <ConsoleLog logs={logs} />
+        <ConsoleLog logs={logs} />
+      </main>
     </div>
   );
 };

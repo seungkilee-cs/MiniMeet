@@ -5,14 +5,20 @@ import "../style/ChatRoom.css";
 
 interface ChatRoomProps {
   roomId: string;
+  currentUserId: string;
   onLog: (message: string) => void;
   onError: (error: string) => void;
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({
+  roomId,
+  currentUserId,
+  onLog,
+  onError,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<User[]>([]);
-  const [messageInput, setMessageInput] = useState<string>("");
+  const [messageInput, setMessageInput] = useState("");
 
   // Separate effect for setting up event listeners (run once)
   useEffect(() => {
@@ -63,7 +69,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
       // Clear previous room data
       setMessages([]);
       setParticipants([]);
-
       // Load message history for new room
       socketService.loadMessageHistory({ roomId, limit: 50 });
     }
@@ -83,7 +88,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
 
     const dto: CreateMessageDto = { content, roomId };
     onLog(
-      `📤 Sending message: "${content.substring(0, 50)}${content.length > 50 ? "..." : ""}", roomId=${roomId}`,
+      `📤 Sending message: "${content.substring(0, 50)}${
+        content.length > 50 ? "..." : ""
+      }", roomId=${roomId}`,
     );
     socketService.sendMessage(dto);
     setMessageInput("");
@@ -97,27 +104,22 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
   };
 
   return (
-    <div className="chat-container">
+    <div className="chat-room">
       {/* Participants Section */}
       <div className="participants-section">
-        <h3 className="section-title">Room Participants:</h3>
+        <h3>Room Participants:</h3>
         <div className="participants-list">
           {participants.length === 0 ? (
-            <em className="empty-state">No participants</em>
+            <div className="no-participants">No participants</div>
           ) : (
             participants.map((participant) => (
-              <div key={participant.id} className="participant-item">
-                <div className="participant-avatar">👤</div>
+              <div key={participant.id} className="participant">
                 <div className="participant-info">
-                  <strong className="participant-name">
-                    {participant.username}
-                  </strong>
-                  <small className="participant-email">
-                    {participant.email}
-                  </small>
-                  <small className="participant-id">
+                  <strong>{participant.username}</strong>
+                  <span className="participant-email">{participant.email}</span>
+                  <span className="participant-id">
                     ID: {participant.id.substring(0, 8)}...
-                  </small>
+                  </span>
                 </div>
               </div>
             ))
@@ -127,44 +129,46 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onLog, onError }) => {
 
       {/* Chat Area */}
       <div className="chat-area">
-        <h3 className="section-title">Chat Messages:</h3>
-
+        <h3>Chat Messages:</h3>
         <div className="messages-container">
           {messages.length === 0 ? (
-            <em className="empty-state">No messages</em>
+            <div className="no-messages">No messages</div>
           ) : (
             messages.map((message) => (
-              <div key={message.id} className="message-item">
-                <div className="message-sender">{message.sender.username}</div>
-                <div className="message-content">{message.content}</div>
-                <div className="message-timestamp">
-                  {new Date(message.timestamp).toLocaleTimeString()}
+              <div key={message.id} className="message">
+                <div className="message-header">
+                  <strong className="message-sender">
+                    {message.sender.username}
+                  </strong>
+                  <span className="message-time">
+                    {new Date(message.timestamp).toLocaleTimeString()}
+                  </span>
                 </div>
+                <div className="message-content">{message.content}</div>
               </div>
             ))
           )}
         </div>
+      </div>
 
-        {/* Message Input */}
-        <div className="message-input-container">
-          <textarea
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message... (1-500 characters)"
-            rows={2}
-            maxLength={500}
-            className="message-textarea"
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={!messageInput.trim() || messageInput.length > 500}
-            className="send-button"
-          >
-            Send
-          </button>
-        </div>
-
+      {/* Message Input */}
+      <div className="message-input-section">
+        <textarea
+          value={messageInput}
+          onChange={(e) => setMessageInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Type your message... (1-500 characters)"
+          rows={2}
+          maxLength={500}
+          className="message-textarea"
+        />
+        <button
+          onClick={handleSendMessage}
+          disabled={!messageInput.trim() || messageInput.length > 500}
+          className="send-button"
+        >
+          Send
+        </button>
         {/* Character Counter */}
         <div className="character-counter">{messageInput.length}/500</div>
       </div>

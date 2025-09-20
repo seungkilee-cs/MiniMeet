@@ -16,6 +16,13 @@ import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '../auth/ws-auth.guard';
 import { MessagesService } from '../messages/messages.service';
 import { CreateMessageDto, LoadMessageHistoryDto } from '../messages/dto';
+import type {
+  WebRTCOffer,
+  WebRTCAnswer,
+  ICECandidate,
+  VideoCallRequest,
+  VideoCallResponse,
+} from '../webrtc/dto/webrtc.dto';
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({
@@ -280,5 +287,174 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         error: error.message,
       });
     }
+  }
+
+  @SubscribeMessage('webrtc-call-user')
+  async handleCallUser(
+    @MessageBody() data: VideoCallRequest,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('WebRTC call attempted by unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `📞 User ${user.username} calling user ${data.toUserId} in room ${data.roomId}`,
+    );
+
+    // Verify both users are in the same room
+    try {
+      const room = await this.roomsService.findOne(data.roomId);
+      const userInRoom = room.participants.some((p) => p.id === user.id);
+      const targetInRoom = room.participants.some(
+        (p) => p.id === data.toUserId,
+      );
+
+      if (!userInRoom || !targetInRoom) {
+        client.emit('webrtc-call-error', {
+          error: 'Users must be in the same room to start video call',
+        });
+        return;
+      }
+
+      // Forward call request to target user
+      this.server.to(data.roomId).emit('webrtc-incoming-call', {
+        fromUserId: user.id,
+        fromUsername: user.username,
+        toUserId: data.toUserId,
+        roomId: data.roomId,
+      });
+
+      this.logger.log(`📞 Call request forwarded to user ${data.toUserId}`);
+    } catch (error) {
+      this.logger.error(`❌ Error in call user: ${error.message}`);
+      client.emit('webrtc-call-error', {
+        error: 'Failed to initiate call',
+      });
+    }
+  }
+
+  @SubscribeMessage('webrtc-answer-call')
+  async handleAnswerCall(
+    @MessageBody() data: VideoCallResponse,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('WebRTC answer attempted by unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `📞 User ${user.username} ${data.accepted ? 'accepted' : 'rejected'} call from ${data.fromUserId}`,
+    );
+
+    // Forward response to caller
+    this.server.to(data.roomId).emit('webrtc-call-answered', {
+      fromUserId: data.fromUserId,
+      toUserId: user.id,
+      toUsername: user.username,
+      roomId: data.roomId,
+      accepted: data.accepted,
+    });
+  }
+
+  @SubscribeMessage('webrtc-offer')
+  async handleWebRTCOffer(
+    @MessageBody() data: WebRTCOffer,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('WebRTC offer attempted by unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `🤝 WebRTC offer from ${user.username} to ${data.toUserId}`,
+    );
+
+    // Forward offer to target user only
+    this.server.to(data.roomId).emit('webrtc-offer-received', {
+      ...data,
+      fromUserId: user.id,
+      fromUsername: user.username,
+    });
+  }
+
+  @SubscribeMessage('webrtc-answer')
+  async handleWebRTCAnswer(
+    @MessageBody() data: WebRTCAnswer,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('WebRTC answer attempted by unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `🤝 WebRTC answer from ${user.username} to ${data.toUserId}`,
+    );
+
+    // Forward answer to target user only
+    this.server.to(data.roomId).emit('webrtc-answer-received', {
+      ...data,
+      fromUserId: user.id,
+      fromUsername: user.username,
+    });
+  }
+
+  @SubscribeMessage('webrtc-ice-candidate')
+  async handleICECandidate(
+    @MessageBody() data: ICECandidate,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('ICE candidate from unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `🧊 ICE candidate from ${user.username} to ${data.toUserId}`,
+    );
+
+    // Forward ICE candidate to target user only
+    this.server.to(data.roomId).emit('webrtc-ice-candidate-received', {
+      ...data,
+      fromUserId: user.id,
+    });
+  }
+
+  @SubscribeMessage('webrtc-hang-up')
+  async handleHangUp(
+    @MessageBody() data: { toUserId: string; roomId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+
+    if (!user) {
+      this.logger.error('Hang up attempted by unauthenticated user');
+      return;
+    }
+
+    this.logger.log(
+      `📞 User ${user.username} hanging up call with ${data.toUserId}`,
+    );
+
+    // Notify other user of hang up
+    this.server.to(data.roomId).emit('webrtc-call-ended', {
+      fromUserId: user.id,
+      toUserId: data.toUserId,
+      roomId: data.roomId,
+    });
   }
 }

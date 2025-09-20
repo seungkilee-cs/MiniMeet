@@ -1,80 +1,260 @@
-.container {
-  max-width: 1000px;
+/* Import Fira Code font (served by Google Fonts) */
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap");
+
+/* Design tokens */
+:root {
+  --bg: #0b1020;
+  --bg-2: #0f1428;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.12);
+  --card: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.14);
+  --text: #e6e9ef;
+  --muted: #a4adbb;
+  --primary: #6cc5ff;
+  --primary-600: #49b6ff;
+  --success: #2ecc71;
+  --danger: #ff6b6b;
+  --warning: #ffd166;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --radius: 12px;
+}
+
+/* Global resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 800px at 10% 10%, #16233a 0%, transparent 60%),
+    radial-gradient(1000px 700px at 90% 20%, #1a2b46 0%, transparent 60%),
+    radial-gradient(1000px 700px at 40% 80%, #1b2e50 0%, transparent 60%),
+    var(--bg);
+}
+
+/* Root app layout */
+.app {
+  max-width: 1100px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
-  padding: 20px;
+  padding: 32px 24px 64px;
 }
 
-.controls {
-  background: #f0f0f0;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 5px;
-}
-
-.validation-info {
-  background: #d1ecf1;
-  color: #0c5460;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 10px 0;
-  font-size: 0.9em;
-}
-
-.status {
-  background: #e8f5e8;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-}
-
-.error {
-  background: #ffeaea;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-}
-
-.chat-container {
+.app-header {
   display: flex;
-  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
 }
 
-.chat-area {
-  flex: 1;
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 5px;
+.app-header h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0.3px;
+  background: linear-gradient(90deg, #cde8ff, #a9d6ff, #e6f6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.token-display {
-  margin-top: 10px;
-  font-family: monospace;
-  word-break: break-all;
+.features {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
+.features strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.features ul {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.features li {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+/* Main content layout */
+.app-main {
+  display: grid;
+  gap: 16px;
+}
+
+/* Generic card scaffolding for sections */
+.app-main > *:not(.console-log, .chat-room) {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input:not([type]) {
+  width: 280px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+input::placeholder {
+  color: #8892a6;
+}
+
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(108, 197, 255, 0.12);
+  background: var(--surface-2);
+}
+
+/* Buttons */
 button {
-  margin: 5px;
-  padding: 8px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 3px;
+  min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: #0b1020;
+  background: linear-gradient(180deg, var(--primary), var(--primary-600));
   cursor: pointer;
-  min-width: 80px;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    filter 120ms ease,
+    opacity 120ms ease;
+  font-weight: 600;
 }
 
 button:hover:not(:disabled) {
-  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(76, 180, 255, 0.35);
+  filter: brightness(1.02);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(76, 180, 255, 0.25);
 }
 
 button:disabled {
-  background: #6c757d;
+  opacity: 0.55;
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
-input {
-  margin: 5px;
-  padding: 8px;
+/* Status and error bars */
+.status {
+  border-radius: 10px;
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(46, 204, 113, 0.15),
+    rgba(46, 204, 113, 0.12)
+  );
+  color: #d9ffe8;
+  padding: 12px 14px;
+}
+
+.error {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 107, 107, 0.14),
+    rgba(255, 107, 107, 0.1)
+  );
+  color: #ffe5e5;
+  padding: 12px 14px;
+}
+
+/* Token display, logs, monospace content */
+.token-display,
+.console-log,
+pre,
+code {
+  font-family:
+    "Fira Code", ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* Console logs area (if the component uses a wrapper) */
+.console-log {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #04070f;
+  color: #9ad1ff;
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* Utility alignments inside the connection/auth sections */
+.app-main section,
+.app-main .controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app {
+    padding: 20px 16px 48px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+  }
+
+  button {
+    min-width: 110px;
+  }
 }
