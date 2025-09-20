@@ -73,13 +73,13 @@ export class WsAuthGuard implements CanActivate {
   }
 
   private extractToken(client: Socket): string | null {
-    // case 1. auth object in handshake
+    // check auth object in handshake
     const authToken = client.handshake.auth?.token;
     if (authToken) {
       return authToken;
     }
 
-    // case 2. Authorization header
+    // or authorization header
     const authHeader = client.handshake.headers.authorization;
     if (authHeader) {
       const [type, token] = authHeader.split(' ');
@@ -88,7 +88,7 @@ export class WsAuthGuard implements CanActivate {
       }
     }
 
-    // case 3. query parameters
+    // or  query param
     const queryToken = client.handshake.query?.token;
     if (typeof queryToken === 'string') {
       return queryToken;

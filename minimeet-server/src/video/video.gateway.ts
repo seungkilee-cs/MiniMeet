@@ -102,18 +102,18 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         roomId,
         user.id,
       );
-      this.logger.log(`✅ User ${user.id} added to room ${roomId} in database`);
+      this.logger.log(` User ${user.id} added to room ${roomId} in database`);
 
       // 2. Then join socket room
       client.join(roomId);
-      this.logger.log(`✅ Socket ${client.id} joined Socket.IO room ${roomId}`);
+      this.logger.log(` Socket ${client.id} joined Socket.IO room ${roomId}`);
 
       // 3. Send success to the joining client FIRST
       client.emit('joinRoomSuccess', {
         roomId,
         message: `Successfully joined room ${updatedRoom.name}`,
       });
-      this.logger.log(`✅ Sent joinRoomSuccess to client ${client.id}`);
+      this.logger.log(` Sent joinRoomSuccess to client ${client.id}`);
 
       // 4. THEN broadcast to ALL room members (including the new joiner)
       this.server.to(roomId).emit('participantsUpdate', {
@@ -121,11 +121,11 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         participants: updatedRoom.participants,
       });
       this.logger.log(
-        `✅ Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} participants)`,
+        ` Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} participants)`,
       );
     } catch (error) {
-      this.logger.error(`❌ Error joining room: ${error.message}`);
-      this.logger.error(`❌ Stack trace: ${error.stack}`);
+      this.logger.error(` Error joining room: ${error.message}`);
+      this.logger.error(` Stack trace: ${error.stack}`);
       client.emit('joinRoomError', {
         roomId,
         error: error.message,
@@ -155,7 +155,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         user.id,
       );
       this.logger.log(
-        `✅ User ${user.username} removed from room ${roomId} in database`,
+        ` User ${user.username} removed from room ${roomId} in database`,
       );
 
       // 2. Send success to the leaving client FIRST (while still in room)
@@ -166,7 +166,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // 3. Leave socket room
       client.leave(roomId);
-      this.logger.log(`✅ Socket ${client.id} left Socket.IO room ${roomId}`);
+      this.logger.log(` Socket ${client.id} left Socket.IO room ${roomId}`);
 
       // 4. THEN broadcast updated participants to remaining members
       this.server.to(roomId).emit('participantsUpdate', {
@@ -174,16 +174,17 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         participants: updatedRoom.participants,
       });
       this.logger.log(
-        `✅ Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} remaining)`,
+        ` Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} remaining)`,
       );
     } catch (error) {
-      this.logger.error(`❌ Error leaving room: ${error.message}`);
+      this.logger.error(` Error leaving room: ${error.message}`);
       client.emit('leaveRoomError', {
         roomId,
         error: error.message,
       });
     }
   }
+
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
@@ -207,7 +208,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         user.id,
         createMessageDto.roomId,
       );
-      this.logger.log(`✅ Message saved: ${message.id}`);
+      this.logger.log(` Message saved: ${message.id}`);
 
       // Remove messageType from payload to match your entity
       const messagePayload = {
@@ -226,14 +227,14 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .to(createMessageDto.roomId)
         .emit('newMessage', messagePayload);
       this.logger.log(
-        `✅ Message broadcasted to room ${createMessageDto.roomId}`,
+        ` Message broadcasted to room ${createMessageDto.roomId}`,
       );
       client.emit('messageSent', {
         messageId: message.id,
         content: message.content,
       });
     } catch (error) {
-      this.logger.error(`❌ Error sending message: ${error.message}`);
+      this.logger.error(` Error sending message: ${error.message}`);
       client.emit('messageError', {
         error: error.message,
       });
@@ -279,10 +280,10 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         messages: formattedMessages,
       });
       this.logger.log(
-        `✅ Sent ${formattedMessages.length} messages to ${user.username}`,
+        ` Sent ${formattedMessages.length} messages to ${user.username}`,
       );
     } catch (error) {
-      this.logger.error(`❌ Error loading message history: ${error.message}`);
+      this.logger.error(` Error loading message history: ${error.message}`);
       client.emit('messageError', {
         error: error.message,
       });
@@ -302,7 +303,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.logger.log(
-      `📞 User ${user.username} calling user ${data.toUserId} in room ${data.roomId}`,
+      ` User ${user.username} calling user ${data.toUserId} in room ${data.roomId}`,
     );
 
     // Verify both users are in the same room
@@ -328,9 +329,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         roomId: data.roomId,
       });
 
-      this.logger.log(`📞 Call request forwarded to user ${data.toUserId}`);
+      this.logger.log(` Call request forwarded to user ${data.toUserId}`);
     } catch (error) {
-      this.logger.error(`❌ Error in call user: ${error.message}`);
+      this.logger.error(` Error in call user: ${error.message}`);
       client.emit('webrtc-call-error', {
         error: 'Failed to initiate call',
       });
@@ -350,7 +351,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.logger.log(
-      `📞 User ${user.username} ${data.accepted ? 'accepted' : 'rejected'} call from ${data.fromUserId}`,
+      ` User ${user.username} ${data.accepted ? 'accepted' : 'rejected'} call from ${data.fromUserId}`,
     );
 
     // Forward response to caller
@@ -375,9 +376,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    this.logger.log(
-      `🤝 WebRTC offer from ${user.username} to ${data.toUserId}`,
-    );
+    this.logger.log(` WebRTC offer from ${user.username} to ${data.toUserId}`);
 
     // Forward offer to target user only
     this.server.to(data.roomId).emit('webrtc-offer-received', {
@@ -399,9 +398,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    this.logger.log(
-      `🤝 WebRTC answer from ${user.username} to ${data.toUserId}`,
-    );
+    this.logger.log(` WebRTC answer from ${user.username} to ${data.toUserId}`);
 
     // Forward answer to target user only
     this.server.to(data.roomId).emit('webrtc-answer-received', {
@@ -423,9 +420,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    this.logger.log(
-      `🧊 ICE candidate from ${user.username} to ${data.toUserId}`,
-    );
+    this.logger.log(` ICE candidate from ${user.username} to ${data.toUserId}`);
 
     // Forward ICE candidate to target user only
     this.server.to(data.roomId).emit('webrtc-ice-candidate-received', {
@@ -447,7 +442,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.logger.log(
-      `📞 User ${user.username} hanging up call with ${data.toUserId}`,
+      ` User ${user.username} hanging up call with ${data.toUserId}`,
     );
 
     // Notify other user of hang up

@@ -1,4 +1,3 @@
-// WebRTC signaling message types
 export interface WebRTCOffer {
   type: 'offer';
   sdp: string;
