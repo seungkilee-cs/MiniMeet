@@ -6,6 +6,7 @@ import {
 } from "../types/message.types";
 
 class SocketService {
+  // Expose the active socket so other modules (e.g., WebRTC hook) can reuse the same connection.
   public socket: Socket | null = null;
 
   connect(token: string): Socket {
@@ -13,6 +14,7 @@ class SocketService {
       process.env.REACT_APP_SOCKET_URL || "http://localhost:3001",
       {
         auth: { token },
+        transports: ["websocket"],
       },
     );
 
@@ -27,6 +29,7 @@ class SocketService {
     return this.socket;
   }
 
+  // Chat/room APIs
   joinRoom(roomId: string) {
     this.socket?.emit("joinRoom", { roomId });
   }
@@ -47,19 +50,16 @@ class SocketService {
     this.socket?.on("joinRoomSuccess", callback);
   }
 
-  // Missing leave room success handler
   onLeaveSuccess(
     callback: (data: { roomId: string; message: string }) => void,
   ) {
     this.socket?.on("leaveRoomSuccess", callback);
   }
 
-  // Join room error handler
   onJoinError(callback: (data: { roomId: string; error: string }) => void) {
     this.socket?.on("joinRoomError", callback);
   }
 
-  // Leave room error handler
   onLeaveError(callback: (data: { roomId: string; error: string }) => void) {
     this.socket?.on("leaveRoomError", callback);
   }
