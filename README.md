@@ -1,5 +1,6 @@
 # MiniMeet
-> [한글](README.ko.md)로도 볼 수 있습니다.
+
+<!-- > [한글](README.ko.md)로도 볼 수 있습니다. -->
 
 Multi-User Video Chat Application using NestJS, TypeScript, TypeORM, Socket.IO, WebRTC
 
@@ -9,7 +10,7 @@ To build a functioning prototype of a real-time video chat application using a s
 
 ## Current Status
 
-✅ Completed Milestones:
+Completed Milestones:
 
 - Backend Foundation : NestJS API with TypeORM, MySQL integration
 - Authentication System : JWT-based auth with WebSocket security guards
@@ -22,13 +23,13 @@ To build a functioning prototype of a real-time video chat application using a s
 
 ## Goal & Roadmap
 
-### ✅ 1. Backend Foundation (COMPLETED)
+### 1. Backend Foundation and Real Time Chat
 
 #### Problem Breakdown & Solutions
 
-- Data Persistence: ✅ Reliable user accounts and room management with TypeORM + MySQL
-- API Consistency: ✅ Type-safe DTOs with class-validator for robust data contracts
-- Architecture Scalability: ✅ Modular NestJS structure with dependency injection
+- Data Persistence: Reliable user accounts and room management with TypeORM + MySQL
+- API Consistency: Type-safe DTOs with class-validator for robust data contracts
+- Architecture Scalability: Modular NestJS structure with dependency injection
 
 #### Deliverables
 
@@ -40,7 +41,7 @@ To build a functioning prototype of a real-time video chat application using a s
 - [x] Real-time text chat with message persistence
 - [x] WebSocket authentication guards and session management
 
-### 🚧 2. Real-Time Video Communication (IN PROGRESS)
+### 2. Real Time Video Communication
 
 #### Problem Breakdown
 
@@ -51,13 +52,13 @@ To build a functioning prototype of a real-time video chat application using a s
 
 #### Deliverables
 
-- [ ] WebRTC signaling server implementation
+- [x] WebRTC signaling server implementation
 - [ ] 1-on-1 video call functionality
 - [ ] Multi-party video calls (up to 4 participants)
 - [ ] Media device management (camera/microphone toggle)
-- [ ] Connection state management and error recovery
+- [x] Connection state management and error recovery
 
-### 🚧 3. Frontend (PLANNED)
+### 3. Frontend
 
 #### Technology Choice: React + TypeScript
 
@@ -68,13 +69,13 @@ To build a functioning prototype of a real-time video chat application using a s
 
 #### Deliverables
 
-- [ ] React + TypeScript project scaffold
-- [ ] Authenticated routing and session management
-- [ ] Real-time chat interface with DTO validation
+- [x] React + TypeScript project scaffold
+- [x] Authenticated routing and session management
+- [x] Real-time chat interface with DTO validation
 - [ ] Video call UI with WebRTC integration
 - [ ] Responsive design for desktop and mobile
 
-### 📈 4. Performance & Scalability (FUTURE)
+### 4. Performance & Scalability
 
 - [ ] Redis integration for session management and caching
 - [ ] MongoDB for flexible message storage and attachments
@@ -84,18 +85,18 @@ To build a functioning prototype of a real-time video chat application using a s
 
 ## Application Overview
 
-### Core Features (Implemented ✅ / Planned 🚧)
+### Core Features
 
-- [x] ✅ JWT-based user authentication
-- [x] ✅ Create/join video chat rooms with real-time presence
-- [x] ✅ Real-time text chat with message persistence
-- [x] ✅ WebSocket authentication and authorization
-- [x] ✅ DTO-validated message handling
-- [ ] 🚧 1-on-1 and group video calls (WebRTC)
-- [ ] 🚧 React + TypeScript frontend interface
-- [ ] 🚧 Video call controls (mute, camera toggle)
-- [ ] 📈 Chat history search (ElasticSearch)
-- [ ] 📈 Call analytics and user presence indicators
+- [x] JWT-based user authentication
+- [x] Create/join video chat rooms with real-time presence
+- [x] Real-time text chat with message persistence
+- [x] WebSocket authentication and authorization
+- [x] DTO-validated message handling
+- [ ] 1-on-1 and group video calls (WebRTC)
+- [ ] React + TypeScript frontend interface
+- [ ] Video call controls (mute, camera toggle)
+- [ ] Chat history search (ElasticSearch)
+- [ ] Call analytics and user presence indicators
 
 ### Technology Stack
 
@@ -103,7 +104,7 @@ To build a functioning prototype of a real-time video chat application using a s
 
 Backend: `NestJS + TypeScript + TypeORM + Socket.IO + WebRTC`
 Frontend: `React + TypeScript + Socket.IO Client`
-Database: `MySQL (TypeORM) + Redis (Sessions) + MongoDB (Rich Content)`
+Database: `MySQL (TypeORM)`
 
 #### Development vs Production
 
@@ -166,23 +167,23 @@ Production (Planned):
 
 ```
 src/
-├── auth/              # ✅ JWT authentication & WebSocket guards
+├── auth/              # JWT authentication & WebSocket guards
 │   ├── auth.service.ts
 │   ├── auth.controller.ts
 │   └── ws-auth.guard.ts
-├── users/             # ✅ User entity and management
-├── rooms/             # ✅ Video room management with participants
+├── users/             # User entity and management
+├── rooms/             # Video room management with participants
 │   ├── rooms.service.ts
 │   └── entities/room.entity.ts
-├── messages/          # ✅ Real-time chat with DTO validation
+├── messages/          # Real-time chat with DTO validation
 │   ├── messages.service.ts
 │   ├── entities/message.entity.ts
 │   └── dto/
 │       ├── create-message.dto.ts
 │       └── load-message-history.dto.ts
-├── video/             # 🚧 WebRTC signaling (in progress)
+├── video/             # WebRTC signaling (in progress)
 │   └── video.gateway.ts
-└── common/            # ✅ Shared utilities and guards
+└── common/            # Shared utilities and guards
 ```
 
 ### Database Schema (TypeORM)
@@ -200,31 +201,31 @@ Room ──┐
 
 ```typescript
 // Authentication & Room Management
-✅ 'joinRoom' → Room participation with database sync
-✅ 'leaveRoom' → Clean disconnection and state update
-✅ 'participantsUpdate' → Real-time presence broadcasting
+'joinRoom' → Room participation with database sync
+'leaveRoom' → Clean disconnection and state update
+'participantsUpdate' → Real-time presence broadcasting
 
 // Real-Time Chat
-✅ 'sendMessage' → DTO-validated message creation
-✅ 'newMessage' → Real-time message broadcasting
-✅ 'loadMessageHistory' → Persistent chat history
-✅ 'messageError' → Validation error feedback
+'sendMessage' → DTO-validated message creation
+'newMessage' → Real-time message broadcasting
+'loadMessageHistory' → Persistent chat history
+'messageError' → Validation error feedback
 
 // WebRTC Signaling (Planned)
-🚧 'webrtc-offer' → Peer connection initiation
-🚧 'webrtc-answer' → Connection response handling
-🚧 'ice-candidate' → Network traversal coordination
+'webrtc-offer' → Peer connection initiation
+'webrtc-answer' → Connection response handling
+'ice-candidate' → Network traversal coordination
 ```
 
 ## Testing & Validation
 
 ### Testing Approach
 
-- ✅ Multi-user scenarios: Different users in same room
-- ✅ Authentication flow: JWT token generation and WebSocket auth
-- ✅ Real-time updates: Message broadcasting and participant management
-- ✅ DTO validation: Client and server-side input validation
-- ✅ Error handling: Graceful failure scenarios and user feedback
+- [x] Multi-user scenarios: Different users in same room
+- [ ] Authentication flow: JWT token generation and WebSocket auth
+- [x] Real-time updates: Message broadcasting and participant management
+- [x] DTO validation: Client and server-side input validation
+- [ ] Error handling: Graceful failure scenarios and user feedback
 
 ## Next Steps
 
