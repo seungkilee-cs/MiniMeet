@@ -9,30 +9,58 @@
   --space: 16px;
 }
 
-/* Chat room panel split into participants + messages */
-.chat-room {
+/* Entire chat surface: participants (left) + chat header/messages/video (right) */
+.chat-surface {
   display: grid;
   grid-template-columns: 320px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "participants chatHeader"
+    "participants messages"
+    "participants video";
   gap: var(--space);
 }
 
-/* Shared card */
+/* Keep ChatRoom component as a two-panel block that fills named areas */
+.chat-room {
+  display: contents;
+}
+
+/* Card styles reused */
 .participants-section,
-.chat-area {
+.chat-area,
+.video-surface {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--panel);
   padding: var(--space);
 }
 
-/* Participants */
-.participants-section h3,
+/* Place participants on the left column across all rows */
+.participants-section {
+  grid-area: participants;
+}
+
+/* Split ChatRoom into header and messages so we can place video under it */
+.chat-area {
+  grid-area: messages;
+}
+
+/* Header inside chat area (use existing h3 as header region) */
 .chat-area h3 {
   margin: 0 0 10px 0;
   font-size: 14px;
   color: var(--muted);
 }
 
+/* Participants heading */
+.participants-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Participants list */
 .participants-list {
   display: grid;
   gap: 8px;
@@ -151,16 +179,51 @@
   font-size: 11px;
 }
 
-/* Empty states */
-.no-participants,
-.no-messages {
+/* Video panel sits to the right, under messages */
+.video-surface {
+  grid-area: video;
+}
+.video-grid {
+  display: grid;
+  gap: var(--space);
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+.video-tile {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-2);
+  padding: 8px;
+}
+.video-tile h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
   color: var(--muted);
-  font-style: italic;
+}
+video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+  border-radius: 8px;
+}
+.controls-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
-/* Responsive */
+/* Responsive: stack vertically on narrow screens */
 @media (max-width: 1024px) {
-  .chat-room {
+  .chat-surface {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "participants"
+      "messages"
+      "video";
+  }
+  .video-grid {
     grid-template-columns: 1fr;
   }
 }

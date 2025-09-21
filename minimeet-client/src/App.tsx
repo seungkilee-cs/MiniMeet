@@ -155,16 +155,7 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>MiniMeet Chat - React + TypeScript</h1>
-        <div className="features">
-          <strong>Features:</strong>
-          <ul>
-            <li>React + TypeScript with full type safety</li>
-            <li>Real-time DTO validation with user feedback</li>
-            <li>Component-based architecture</li>
-            <li>Environment-based configuration</li>
-          </ul>
-        </div>
+        <h1>MiniMeet Client</h1>
       </header>
 
       <main className="app-main">
@@ -188,12 +179,15 @@ const App: React.FC = () => {
 
         {currentRoomId && currentUser && (
           <>
-            <ChatRoom
-              roomId={currentRoomId}
-              currentUserId={currentUser.id}
-              onLog={addLog}
-              onError={showError}
-            />
+            <div className="chat-surface">
+              <ChatRoom
+                roomId={currentRoomId}
+                currentUserId={currentUser.id}
+                onLog={addLog}
+                onError={showError}
+              />
+            </div>
+
             <VideoChat
               roomId={currentRoomId}
               currentUserId={currentUser.id}

@@ -10,16 +10,16 @@ To build a functioning prototype of a real-time video chat application using a s
 
 ## Current Status
 
+![WebRTC](./_screenshots/2.5.WebRTC_Video_Chat_TS/React_Client.png)
+
 Completed Milestones:
 
 - Backend Foundation : NestJS API with TypeORM, MySQL integration
 - Authentication System : JWT-based auth with WebSocket security guards
 - Real-Time Chat : Socket.IO messaging with DTO validation
-
-In Progress:
-
 - WebRTC Video Implementation (Milestone 2.5): Peer-to-peer video streaming
 - React + TypeScript Frontend: Production-ready client interface
+
 
 ## Goal & Roadmap
 

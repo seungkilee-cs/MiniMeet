@@ -132,3 +132,5 @@ pids
 
 _legacy/
 _legacy/*
+dev_log/
+dev_log/*

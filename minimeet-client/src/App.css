@@ -105,12 +105,13 @@ body {
 
 /* Main grid: left controls, right log; chat/video render below controls */
 .app-main {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.app-main > *:not(.console-log) {
+/* Every direct child of app-main is a full-width card surface */
+.app-main > * {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--panel);
@@ -203,17 +204,13 @@ button.btn-outline {
   padding: 10px 12px;
 }
 
-/* Console log panel */
+/* If ConsoleLog already applies its own background/border, you can optionally remove double framing: */
 .console-log {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #0a0d1a;
   box-shadow: var(--shadow);
   padding: 12px;
-  color: #a9dcff;
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
 }
 
 /* VideoChat minimal layout helpers */

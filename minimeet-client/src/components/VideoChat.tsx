@@ -27,7 +27,7 @@ const VideoChat: React.FC<VideoChatProps> = ({
   const others = participants.filter((p) => p.id !== currentUserId);
 
   return (
-    <div className="video-chat">
+    <div className="video-surface">
       <h3 style={{ margin: 0, fontSize: 14, color: "#9aa3b2" }}>Video Chat</h3>
 
       <div className="video-grid">
