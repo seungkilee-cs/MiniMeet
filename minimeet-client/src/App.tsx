@@ -26,7 +26,6 @@ const App: React.FC = () => {
     username: string;
   } | null>(null);
 
-  // Use useCallback for stable references
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
@@ -48,9 +47,9 @@ const App: React.FC = () => {
     try {
       const newToken = await apiClient.getToken(userId.trim());
       setToken(newToken);
-      addLog(` Token obtained for user ${userId}`);
+      addLog(`Token obtained for user ${userId}`);
     } catch (error: any) {
-      addLog(` Token error: ${error.message}`);
+      addLog(`Token error: ${error.message}`);
       showError(error.message);
     }
   };
@@ -64,53 +63,46 @@ const App: React.FC = () => {
     const socket = socketService.connect(token);
 
     socket.on("connect", () => {
-      addLog(` Connected! Socket ID: ${socket.id}`);
+      addLog(`Connected! Socket ID: ${socket.id}`);
       setStatus("Connected and authenticated");
       setIsConnected(true);
-
-      // Store current user info (get from JWT or socket)
-      // FIX: fix later -> this is a placeholder - adapt based on the authentication if I ever finish the auth
       setCurrentUser({ id: userId, username: userId });
     });
 
     socket.on("disconnect", () => {
-      addLog(" Disconnected from server");
+      addLog("Disconnected from server");
       setStatus("Disconnected");
       setIsConnected(false);
       setCurrentRoomId("");
     });
 
     socket.on("authError", (data: any) => {
-      addLog(` Auth error: ${data.message}`);
+      addLog(`Auth error: ${data.message}`);
       showError(`Authentication failed: ${data.message}`);
     });
 
-    // Handle join room success
     socketService.onJoinSuccess((data) => {
-      addLog(` Successfully joined room: ${data.roomId}`);
+      addLog(`Successfully joined room: ${data.roomId}`);
       setCurrentRoomId(data.roomId);
     });
 
-    // Handle leave room success - CLEAR THE ROOM
     socketService.onLeaveSuccess((data) => {
-      addLog(` Successfully left room: ${data.roomId}`);
-      setCurrentRoomId(""); // ← This clears the ChatRoom component
+      addLog(`Successfully left room: ${data.roomId}`);
+      setCurrentRoomId("");
     });
 
-    // Handle join room errors
     socketService.onJoinError((data) => {
-      addLog(` Failed to join room: ${data.error}`);
+      addLog(`Failed to join room: ${data.error}`);
       showError(`Failed to join room: ${data.error}`);
     });
 
-    // Handle leave room errors
     socketService.onLeaveError((data) => {
-      addLog(` Failed to leave room: ${data.error}`);
+      addLog(`Failed to leave room: ${data.error}`);
       showError(`Failed to leave room: ${data.error}`);
     });
 
     socketService.onMessageError((data) => {
-      addLog(` Message error: ${data.error}`);
+      addLog(`Message error: ${data.error}`);
       let userMessage = data.error;
       if (data.error.includes("too long")) {
         userMessage =
@@ -126,7 +118,7 @@ const App: React.FC = () => {
 
     socketService.onParticipantsUpdate((data) => {
       setParticipants(data.participants);
-      addLog(` Participants update: ${data.participants.length} users`);
+      addLog(`Participants update: ${data.participants.length} users`);
     });
   };
 
@@ -141,7 +133,7 @@ const App: React.FC = () => {
       return;
     }
 
-    addLog(` Joining room: ${roomId}`);
+    addLog(`Joining room: ${roomId}`);
     socketService.joinRoom(roomId.trim());
   };
 
@@ -156,51 +148,64 @@ const App: React.FC = () => {
       return;
     }
 
-    addLog(` Leaving room: ${currentRoomId}`);
+    addLog(`Leaving room: ${currentRoomId}`);
     socketService.leaveRoom(currentRoomId);
   };
 
   return (
-    <div className="App">
-      <h1>Video Chat Application</h1>
+    <div className="app">
+      <header className="app-header">
+        <h1>MiniMeet Chat - React + TypeScript</h1>
+        <div className="features">
+          <strong>Features:</strong>
+          <ul>
+            <li>React + TypeScript with full type safety</li>
+            <li>Real-time DTO validation with user feedback</li>
+            <li>Component-based architecture</li>
+            <li>Environment-based configuration</li>
+          </ul>
+        </div>
+      </header>
 
-      <AuthSection
-        userId={userId}
-        onUserIdChange={setUserId}
-        onGetToken={handleGetToken}
-        token={token}
-      />
+      <main className="app-main">
+        <AuthSection
+          userId={userId}
+          token={token}
+          onUserIdChange={setUserId}
+          onGetToken={handleGetToken}
+        />
 
-      <ConnectionSection
-        isConnected={isConnected}
-        onConnect={handleConnect}
-        roomId={roomId}
-        onRoomIdChange={setRoomId}
-        onJoinRoom={handleJoinRoom}
-        onLeaveRoom={handleLeaveRoom}
-      />
+        <ConnectionSection
+          isConnected={isConnected}
+          roomId={roomId}
+          onRoomIdChange={setRoomId}
+          onConnect={handleConnect}
+          onJoinRoom={handleJoinRoom}
+          onLeaveRoom={handleLeaveRoom}
+        />
 
-      <StatusDisplay status={status} error={error} />
+        <StatusDisplay status={status} error={error} />
 
-      {currentRoomId && currentUser && (
-        <>
-          <ChatRoom
-            roomId={currentRoomId}
-            currentUserId={currentUser.id}
-            onLog={addLog}
-            onError={showError}
-          />
-          <VideoChat
-            roomId={currentRoomId}
-            currentUserId={currentUser.id}
-            participants={participants}
-            onLog={addLog}
-            onError={showError}
-          />
-        </>
-      )}
+        {currentRoomId && currentUser && (
+          <>
+            <ChatRoom
+              roomId={currentRoomId}
+              currentUserId={currentUser.id}
+              onLog={addLog}
+              onError={showError}
+            />
+            <VideoChat
+              roomId={currentRoomId}
+              currentUserId={currentUser.id}
+              participants={participants}
+              onLog={addLog}
+              onError={showError}
+            />
+          </>
+        )}
 
-      <ConsoleLog logs={logs} />
+        <ConsoleLog logs={logs} />
+      </main>
     </div>
   );
 };

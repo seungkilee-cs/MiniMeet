@@ -16,69 +16,41 @@ const VideoChat: React.FC<VideoChatProps> = ({
   onLog,
   onError,
 }) => {
-  const { localVideoRef, remoteVideoRef, startCall, isCallActive } = useWebRTC({
-    roomId,
-    localUserId: currentUserId,
-    onLog,
-    onError,
-  });
+  const { localVideoRef, remoteVideoRef, startCall, endCall, isCallActive } =
+    useWebRTC({
+      roomId,
+      localUserId: currentUserId,
+      onLog,
+      onError,
+    });
 
-  // Get other participants (exclude current user)
-  const otherParticipants = participants.filter((p) => p.id !== currentUserId);
+  const others = participants.filter((p) => p.id !== currentUserId);
 
   return (
     <div className="video-chat">
-      <h2> Video Chat</h2>
+      <h3 style={{ margin: 0, fontSize: 14, color: "#9aa3b2" }}>Video Chat</h3>
 
-      {/* Video Area */}
-      <div className="video-area">
-        {/* Local Video */}
-        <div className="video-container">
+      <div className="video-grid">
+        <div className="video-tile">
           <h4>You</h4>
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            style={{ width: "300px", height: "200px", backgroundColor: "#000" }}
-          />
+          <video ref={localVideoRef} autoPlay muted playsInline />
         </div>
-
-        {/* Remote Video */}
-        {isCallActive && (
-          <div className="video-container">
-            <h4>Remote User</h4>
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              style={{
-                width: "300px",
-                height: "200px",
-                backgroundColor: "#000",
-              }}
-            />
-          </div>
-        )}
+        <div className="video-tile">
+          <h4>Remote</h4>
+          <video ref={remoteVideoRef} autoPlay playsInline />
+        </div>
       </div>
 
-      {/* Controls */}
-      <div className="video-controls">
-        <h4>Available Participants:</h4>
-        {otherParticipants.length > 0 ? (
-          otherParticipants.map((participant) => (
-            <div key={participant.id} style={{ margin: "10px 0" }}>
-              <span>{participant.username}</span>
-              <button
-                onClick={() => startCall(participant.id)}
-                style={{ marginLeft: "10px", padding: "5px 15px" }}
-              >
-                Call
-              </button>
-            </div>
-          ))
-        ) : (
-          <p>No other participants to call</p>
+      <div className="controls-row">
+        {others.map((p) => (
+          <button key={p.id} onClick={() => startCall(p.id)}>
+            Call {p.username}
+          </button>
+        ))}
+        {isCallActive && (
+          <button className="btn-danger" onClick={endCall}>
+            End Call
+          </button>
         )}
       </div>
     </div>
