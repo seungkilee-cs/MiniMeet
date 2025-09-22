@@ -20,7 +20,6 @@ Completed Milestones:
 - WebRTC Video Implementation (Milestone 2.5): Peer-to-peer video streaming
 - React + TypeScript Frontend: Production-ready client interface
 
-
 ## Goal & Roadmap
 
 ### 1. Backend Foundation and Real Time Chat
@@ -53,7 +52,7 @@ Completed Milestones:
 #### Deliverables
 
 - [x] WebRTC signaling server implementation
-- [ ] 1-on-1 video call functionality
+- [x] 1-on-1 video call functionality
 - [ ] Multi-party video calls (up to 4 participants)
 - [ ] Media device management (camera/microphone toggle)
 - [x] Connection state management and error recovery
@@ -72,7 +71,7 @@ Completed Milestones:
 - [x] React + TypeScript project scaffold
 - [x] Authenticated routing and session management
 - [x] Real-time chat interface with DTO validation
-- [ ] Video call UI with WebRTC integration
+- [x] Video call UI with WebRTC integration
 - [ ] Responsive design for desktop and mobile
 
 ### 4. Performance & Scalability
@@ -92,8 +91,8 @@ Completed Milestones:
 - [x] Real-time text chat with message persistence
 - [x] WebSocket authentication and authorization
 - [x] DTO-validated message handling
-- [ ] 1-on-1 and group video calls (WebRTC)
-- [ ] React + TypeScript frontend interface
+- [x] 1-on-1 and group video calls (WebRTC)
+- [x] React + TypeScript frontend interface
 - [ ] Video call controls (mute, camera toggle)
 - [ ] Chat history search (ElasticSearch)
 - [ ] Call analytics and user presence indicators
@@ -110,9 +109,9 @@ Database: `MySQL (TypeORM)`
 
 ```
 Development (Current):
-- MySQL                    -> Simple relational data
+- MySQL                   -> Simple relational data
 - Socket.IO               -> Real-time communication
-- HTML Test Clients       -> Rapid prototyping
+- React + TS Client       -> Rapid prototyping
 - Local development       -> Easy setup and testing
 
 Production (Planned):
@@ -129,7 +128,7 @@ Production (Planned):
 ```
 ┌─────────────────┐    ┌──────────────────────────────────┐
 │   Test Client   │    │         NestJS Backend           │
-│                 │◄──►│  ┌─────────────────────────────┐ │
+│    React+TS     │◄──►│  ┌─────────────────────────────┐ │
 └─────────────────┘    │  │     VideoGateway            │ │
                        │  │   (Socket.IO + Auth)        │ │
                        │  └─────────────────────────────┘ │
@@ -150,7 +149,7 @@ Production (Planned):
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   React + TS    │    │   NestJS API     │    │  Media Services │
-│   Frontend      │◄──►│   Gateway        │◄──►│  (WebRTC SFU)   │
+│   Frontend      │◄──►│   Gateway        │◄──►│    (WebRTC)     │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                  │
                     ┌────────────┼───────────┐
@@ -181,7 +180,7 @@ src/
 │   └── dto/
 │       ├── create-message.dto.ts
 │       └── load-message-history.dto.ts
-├── video/             # WebRTC signaling (in progress)
+├── video/             # WebRTC signaling
 │   └── video.gateway.ts
 └── common/            # Shared utilities and guards
 ```
