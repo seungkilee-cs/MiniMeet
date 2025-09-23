@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package rooms;
+
+service RoomService {
+  rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse);
+  rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
+  rpc GetRoomParticipants(GetRoomParticipantsRequest) returns (GetRoomParticipantsResponse);
+}
+
+message CreateRoomRequest {
+  string name = 1;
+  int32 maxParticipants = 2;
+  string createdBy = 3;
+}
+
+message CreateRoomResponse {
+  string roomId = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message JoinRoomRequest {
+  string roomId = 1;
+  string userId = 2;
+}
+
+message JoinRoomResponse {
+  bool success = 1;
+  repeated User participants = 2;
+  string error = 3;
+}
+
+message GetRoomParticipantsRequest {
+  string roomId = 1;
+}
+
+message GetRoomParticipantsResponse {
+  repeated User participants = 1;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+}
+
