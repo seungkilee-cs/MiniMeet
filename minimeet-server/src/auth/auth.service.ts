@@ -22,7 +22,7 @@ export class AuthService {
   async validateToken(token: string): Promise<any> {
     try {
       return await this.jwtService.verifyAsync(token);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

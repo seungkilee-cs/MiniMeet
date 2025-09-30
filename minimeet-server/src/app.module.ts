@@ -1,36 +1,41 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
-import { VideoGateway } from './video/video.gateway';
 import { AuthModule } from './auth/auth.module';
 import { MessagesModule } from './messages/messages.module';
+import { VideoModule } from './video/video.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: 3306,
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_NAME || 'minimeet',
-      autoLoadEntities: true,
-      synchronize: true, // Only for development
-      logging: true, // Shows SQL queries in console
+    ConfigModule.forRoot({ isGlobal: true }),
+    // CacheModule is no longer needed for providing the Redis client
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.get('DB_HOST'),
+        port: config.get('DB_PORT'),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true,
+        logging: true,
+      }),
     }),
     UsersModule,
     RoomsModule,
     AuthModule,
     MessagesModule,
+    VideoModule,
   ],
   controllers: [AppController],
-  providers: [AppService, VideoGateway],
+  providers: [AppService],
 })
 export class AppModule {}

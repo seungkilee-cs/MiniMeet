@@ -15,7 +15,7 @@ export class AuthController {
         expires_in: '24h',
       };
     } catch (error) {
-      throw new Error(`Failed to generate token: ${error.message}`);
+      throw new Error(`Failed to generate token: ${(error as Error).message}`);
     }
   }
 }

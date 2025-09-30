@@ -2,13 +2,26 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  UnauthorizedException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { jwtConstants } from './constants';
+import { User } from '../users/entities/user.entity';
+
+interface JwtPayload {
+  sub: string;
+  username: string;
+  email: string;
+  exp?: number;
+}
+
+interface AuthenticatedSocket extends Socket {
+  data: {
+    user: Partial<User>;
+  };
+}
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
@@ -22,7 +35,9 @@ export class WsAuthGuard implements CanActivate {
       return false;
     }
 
-    const client: Socket = context.switchToWs().getClient<Socket>();
+    const client: AuthenticatedSocket = context
+      .switchToWs()
+      .getClient<AuthenticatedSocket>();
 
     try {
       // extract token from multiple possible locations
@@ -34,7 +49,7 @@ export class WsAuthGuard implements CanActivate {
       }
 
       // verify the JWT token
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
       // token expiration handling
@@ -43,10 +58,12 @@ export class WsAuthGuard implements CanActivate {
       }
 
       // attach user information to socket for later use
-      client.data.user = {
-        id: payload.sub,
-        username: payload.username,
-        email: payload.email,
+      client.data = {
+        user: {
+          id: payload.sub,
+          username: payload.username,
+          email: payload.email,
+        },
       };
 
       this.logger.log(`Setting user data: ${JSON.stringify(client.data.user)}`);
@@ -57,13 +74,13 @@ export class WsAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       this.logger.error(
-        `Authentication failed for socket ${client.id}: ${error.message}`,
+        `Authentication failed for socket ${client.id}: ${(error as Error).message}`,
       );
 
       // emit error to client before disconnecting
       client.emit('authError', {
         message: 'Authentication failed',
-        error: error.message,
+        error: (error as Error).message,
       });
 
       client.disconnect();
@@ -72,10 +89,10 @@ export class WsAuthGuard implements CanActivate {
     }
   }
 
-  private extractToken(client: Socket): string | null {
+  private extractToken(client: AuthenticatedSocket): string | null {
     // check auth object in handshake
-    const authToken = client.handshake.auth?.token;
-    if (authToken) {
+    const { token: authToken } = client.handshake.auth || {};
+    if (typeof authToken === 'string') {
       return authToken;
     }
 
@@ -83,15 +100,18 @@ export class WsAuthGuard implements CanActivate {
     const authHeader = client.handshake.headers.authorization;
     if (authHeader) {
       const [type, token] = authHeader.split(' ');
-      if (type === 'Bearer' && token) {
+      if (type === 'Bearer' && typeof token === 'string') {
         return token;
       }
     }
 
     // or  query param
-    const queryToken = client.handshake.query?.token;
+    const { token: queryToken } = client.handshake.query || {};
     if (typeof queryToken === 'string') {
       return queryToken;
+    }
+    if (Array.isArray(queryToken) && typeof queryToken[0] === 'string') {
+      return queryToken[0];
     }
 
     return null;

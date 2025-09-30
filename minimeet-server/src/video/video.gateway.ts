@@ -10,7 +10,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject } from '@nestjs/common';
 import { RoomsService } from '../rooms/rooms.service';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '../auth/ws-auth.guard';
@@ -23,6 +23,15 @@ import type {
   VideoCallRequest,
   VideoCallResponse,
 } from '../webrtc/dto/webrtc.dto';
+import { Redis } from 'ioredis';
+import { REDIS_CLIENT } from '../common/providers/redis-client.provider';
+import { User } from '../users/entities/user.entity';
+
+interface AuthenticatedSocket extends Socket {
+  data: {
+    user: User;
+  };
+}
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({
@@ -35,22 +44,21 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
   private logger: Logger = new Logger('VideoGateway');
   constructor(
+    @Inject(REDIS_CLIENT) private redisClient: Redis,
     private readonly roomsService: RoomsService,
     private readonly messagesService: MessagesService,
   ) {}
-  private connectedUsers: Map<string, string> = new Map();
 
   handleConnection(client: Socket) {
     const userId = client.handshake.query.userId as string;
     if (userId) {
-      this.connectedUsers.set(client.id, userId);
       this.logger.log(`Client connected: ${client.id}, User ID: ${userId}`);
     } else {
       this.logger.log(`Client connected: ${client.id}`);
     }
   }
 
-  async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: AuthenticatedSocket) {
     const user = client.data.user;
     if (!user) {
       this.logger.log(`Unauthenticated client disconnected: ${client.id}`);
@@ -62,25 +70,29 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const userRooms = await this.roomsService.findRoomsByUserId(user.id);
       for (const room of userRooms) {
-        await this.roomsService.removeUserFromRoom(room.id, user.id);
-        const updatedRoom = await this.roomsService.findOne(room.id);
+        await this.redisClient.srem(`room:${room.id}:users`, user.id);
+        const participants = await this.redisClient.smembers(
+          `room:${room.id}:users`,
+        );
         this.server.to(room.id).emit('participantsUpdate', {
           roomId: room.id,
-          participants: updatedRoom.participants,
+          participants,
         });
         this.logger.log(
           `Cleaned up user ${user.username} from room ${room.name}`,
         );
       }
     } catch (error) {
-      this.logger.error(`Error during disconnect cleanup: ${error.message}`);
+      this.logger.error(
+        `Error during disconnect cleanup: ${(error as Error).message}`,
+      );
     }
   }
 
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(
     @MessageBody() data: { roomId: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
     const { roomId } = data;
@@ -89,7 +101,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (!user || !user.id) {
       this.logger.error('Join room attempted by unauthenticated user');
-      client.emit('joinRoomError', {
+      void client.emit('joinRoomError', {
         roomId,
         error: 'User not authenticated',
       });
@@ -108,27 +120,33 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.join(roomId);
       this.logger.log(` Socket ${client.id} joined Socket.IO room ${roomId}`);
 
-      // 3. Send success to the joining client FIRST
-      client.emit('joinRoomSuccess', {
+      // 3. Add user to Redis set
+      await this.redisClient.sadd(`room:${roomId}:users`, user.id);
+
+      // 4. Send success to the joining client FIRST
+      void client.emit('joinRoomSuccess', {
         roomId,
         message: `Successfully joined room ${updatedRoom.name}`,
       });
       this.logger.log(` Sent joinRoomSuccess to client ${client.id}`);
 
-      // 4. THEN broadcast to ALL room members (including the new joiner)
-      this.server.to(roomId).emit('participantsUpdate', {
+      // 5. THEN broadcast to ALL room members (including the new joiner)
+      const participants = await this.redisClient.smembers(
+        `room:${roomId}:users`,
+      );
+      void this.server.to(roomId).emit('participantsUpdate', {
         roomId,
-        participants: updatedRoom.participants,
+        participants,
       });
       this.logger.log(
-        ` Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} participants)`,
+        ` Broadcast participant update to room ${roomId} (${participants.length} participants)`,
       );
     } catch (error) {
-      this.logger.error(` Error joining room: ${error.message}`);
-      this.logger.error(` Stack trace: ${error.stack}`);
-      client.emit('joinRoomError', {
+      this.logger.error(` Error joining room: ${(error as Error).message}`);
+      this.logger.error(` Stack trace: ${(error as Error).stack}`);
+      void client.emit('joinRoomError', {
         roomId,
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   }
@@ -136,7 +154,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveRoom')
   async handleLeaveRoom(
     @MessageBody() data: { roomId: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
     const { roomId } = data;
@@ -158,29 +176,35 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ` User ${user.username} removed from room ${roomId} in database`,
       );
 
-      // 2. Send success to the leaving client FIRST (while still in room)
-      client.emit('leaveRoomSuccess', {
+      // 2. Remove user from Redis set
+      await this.redisClient.srem(`room:${roomId}:users`, user.id);
+
+      // 3. Send success to the leaving client FIRST (while still in room)
+      void client.emit('leaveRoomSuccess', {
         roomId,
         message: `Successfully left room ${updatedRoom.name}`,
       });
 
-      // 3. Leave socket room
+      // 4. Leave socket room
       client.leave(roomId);
       this.logger.log(` Socket ${client.id} left Socket.IO room ${roomId}`);
 
-      // 4. THEN broadcast updated participants to remaining members
-      this.server.to(roomId).emit('participantsUpdate', {
+      // 5. THEN broadcast updated participants to remaining members
+      const participants = await this.redisClient.smembers(
+        `room:${roomId}:users`,
+      );
+      void this.server.to(roomId).emit('participantsUpdate', {
         roomId,
-        participants: updatedRoom.participants,
+        participants,
       });
       this.logger.log(
-        ` Broadcast participant update to room ${roomId} (${updatedRoom.participants.length} remaining)`,
+        ` Broadcast participant update to room ${roomId} (${participants.length} remaining)`,
       );
     } catch (error) {
-      this.logger.error(` Error leaving room: ${error.message}`);
-      client.emit('leaveRoomError', {
+      this.logger.error(` Error leaving room: ${(error as Error).message}`);
+      void client.emit('leaveRoomError', {
         roomId,
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   }
@@ -188,12 +212,12 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
     if (!user || !user.id) {
       this.logger.error('Message send attempted by unauthenticated user');
-      client.emit('messageError', {
+      void client.emit('messageError', {
         error: 'User not authenticated',
       });
       return;
@@ -229,14 +253,14 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(
         ` Message broadcasted to room ${createMessageDto.roomId}`,
       );
-      client.emit('messageSent', {
+      void client.emit('messageSent', {
         messageId: message.id,
         content: message.content,
       });
     } catch (error) {
-      this.logger.error(` Error sending message: ${error.message}`);
-      client.emit('messageError', {
-        error: error.message,
+      this.logger.error(` Error sending message: ${(error as Error).message}`);
+      void client.emit('messageError', {
+        error: (error as Error).message,
       });
     }
   }
@@ -244,7 +268,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('loadMessageHistory')
   async handleLoadMessageHistory(
     @MessageBody() loadHistoryDto: LoadMessageHistoryDto,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
     if (!user || !user.id) {
@@ -275,7 +299,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         timestamp: message.createdAt,
       }));
 
-      client.emit('messageHistory', {
+      void client.emit('messageHistory', {
         roomId: loadHistoryDto.roomId,
         messages: formattedMessages,
       });
@@ -283,9 +307,11 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ` Sent ${formattedMessages.length} messages to ${user.username}`,
       );
     } catch (error) {
-      this.logger.error(` Error loading message history: ${error.message}`);
-      client.emit('messageError', {
-        error: error.message,
+      this.logger.error(
+        ` Error loading message history: ${(error as Error).message}`,
+      );
+      void client.emit('messageError', {
+        error: (error as Error).message,
       });
     }
   }
@@ -293,7 +319,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('webrtc-call-user')
   async handleCallUser(
     @MessageBody() data: VideoCallRequest,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 
@@ -331,7 +357,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.logger.log(` Call request forwarded to user ${data.toUserId}`);
     } catch (error) {
-      this.logger.error(` Error in call user: ${error.message}`);
+      this.logger.error(` Error in call user: ${(error as Error).message}`);
       client.emit('webrtc-call-error', {
         error: 'Failed to initiate call',
       });
@@ -339,9 +365,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('webrtc-answer-call')
-  async handleAnswerCall(
+  handleAnswerCall(
     @MessageBody() data: VideoCallResponse,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 
@@ -365,9 +391,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('webrtc-offer')
-  async handleWebRTCOffer(
+  handleWebRTCOffer(
     @MessageBody() data: WebRTCOffer,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 
@@ -387,9 +413,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('webrtc-answer')
-  async handleWebRTCAnswer(
+  handleWebRTCAnswer(
     @MessageBody() data: WebRTCAnswer,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 
@@ -409,9 +435,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('webrtc-ice-candidate')
-  async handleICECandidate(
+  handleICECandidate(
     @MessageBody() data: ICECandidate,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 
@@ -430,9 +456,9 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('webrtc-hang-up')
-  async handleHangUp(
+  handleHangUp(
     @MessageBody() data: { toUserId: string; roomId: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
 

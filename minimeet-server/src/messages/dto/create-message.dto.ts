@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  MaxLength,
-  MinLength,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
 export enum MessageType {
   TEXT = 'text',

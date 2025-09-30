@@ -30,21 +30,23 @@ export class MessagesService {
       room,
     });
 
-    return this.messagesRepository.save(message);
+    const savedMessage = await this.messagesRepository.save(message);
+
+    return savedMessage;
   }
 
   async findRecentByRoom(
     roomId: string,
     limit: number = 50,
   ): Promise<Message[]> {
-    const room = await this.roomsService.findOne(roomId);
-
-    return this.messagesRepository.find({
+    const messages = await this.messagesRepository.find({
       where: { room: { id: roomId }, isActive: true },
       order: { createdAt: 'DESC' },
       take: limit,
       relations: ['sender', 'room'],
     });
+
+    return messages;
   }
 
   async findAll(): Promise<Message[]> {

@@ -1,7 +1,15 @@
-import { AuthGuard } from './auth.guard';
+import { WsAuthGuard } from './ws-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
-describe('AuthGuard', () => {
+describe('WsAuthGuard', () => {
+  let guard: WsAuthGuard;
+
+  beforeEach(() => {
+    const jwtService = new JwtService({ secret: 'test' });
+    guard = new WsAuthGuard(jwtService);
+  });
+
   it('should be defined', () => {
-    expect(new AuthGuard()).toBeDefined();
+    expect(guard).toBeDefined();
   });
 });
