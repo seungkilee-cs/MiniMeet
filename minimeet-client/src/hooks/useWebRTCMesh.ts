@@ -44,20 +44,6 @@ export const useWebRTCMesh = ({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const mountedRef = useRef<boolean>(false);
 
-  const rtcConfig: RTCConfiguration = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-    ],
-  };
-
-  const getSocket = useCallback(() => {
-    if (!socketService.socket || !socketService.socket.connected) {
-      throw new Error("Socket is not connected");
-    }
-    return socketService.socket;
-  }, []);
-
   const ensureLocalMedia = useCallback(async (): Promise<MediaStream> => {
     if (state.localStream) return state.localStream;
     try {
@@ -84,29 +70,40 @@ export const useWebRTCMesh = ({
 
       const handler = (data: { roomId: string; participants: ParticipantInfo[] }) => {
         clearTimeout(timeout);
-        getSocket().off("room-participants", handler);
-        getSocket().off("room-participants-error", errorHandler);
+        socketService.socket?.off("room-participants", handler);
+        socketService.socket?.off("room-participants-error", errorHandler);
         resolve(data.participants);
       };
 
       const errorHandler = (data: { error: string }) => {
         clearTimeout(timeout);
-        getSocket().off("room-participants", handler);
-        getSocket().off("room-participants-error", errorHandler);
+        socketService.socket?.off("room-participants", handler);
+        socketService.socket?.off("room-participants-error", errorHandler);
         reject(new Error(data.error));
       };
 
-      getSocket().on("room-participants", handler);
-      getSocket().on("room-participants-error", errorHandler);
-      getSocket().emit("get-room-participants", { roomId });
+      if (!socketService.socket) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
+      socketService.socket.on("room-participants", handler);
+      socketService.socket.on("room-participants-error", errorHandler);
+      socketService.socket.emit("get-room-participants", { roomId });
     });
-  }, [roomId, getSocket]);
+  }, [roomId]);
 
   const createPeerForUser = useCallback(
     (userId: string, stream: MediaStream): RTCPeerConnection => {
       if (peerConnectionsRef.current.has(userId)) {
         return peerConnectionsRef.current.get(userId)!;
       }
+
+      // WebRTC Configuration
+      const rtcConfig: RTCConfiguration = {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+        ],
+      };
 
       onLog(`Creating peer connection for ${userId}`);
       const pc = new RTCPeerConnection(rtcConfig);
@@ -120,7 +117,7 @@ export const useWebRTCMesh = ({
       pc.onicecandidate = (event) => {
         if (event.candidate) {
           try {
-            getSocket().emit("webrtc-ice-candidate", {
+            socketService.socket?.emit("webrtc-ice-candidate", {
               candidate: event.candidate.candidate,
               sdpMid: event.candidate.sdpMid,
               sdpMLineIndex: event.candidate.sdpMLineIndex,
@@ -172,7 +169,7 @@ export const useWebRTCMesh = ({
       peerConnectionsRef.current.set(userId, pc);
       return pc;
     },
-    [getSocket, localUserId, roomId, onLog, onError, rtcConfig]
+    [localUserId, roomId, onLog, onError]
   );
 
   const startMeshCall = useCallback(async () => {
@@ -203,7 +200,7 @@ export const useWebRTCMesh = ({
         });
         await pc.setLocalDescription(offer);
 
-        getSocket().emit("webrtc-offer", {
+        socketService.socket?.emit("webrtc-offer", {
           type: "offer",
           sdp: offer.sdp,
           fromUserId: localUserId,
@@ -225,7 +222,6 @@ export const useWebRTCMesh = ({
     ensureLocalMedia,
     getRoomParticipants,
     createPeerForUser,
-    getSocket,
     localUserId,
     roomId,
     onLog,
@@ -244,7 +240,7 @@ export const useWebRTCMesh = ({
 
         // Notify peer
         try {
-          getSocket().emit("webrtc-hang-up", {
+          socketService.socket?.emit("webrtc-hang-up", {
             toUserId: userId,
             roomId,
           });
@@ -270,7 +266,7 @@ export const useWebRTCMesh = ({
         connectedUserIds: [],
       });
     }
-  }, [getSocket, roomId, state.localStream, onLog]);
+  }, [roomId, state.localStream, onLog]);
 
   const toggleVideo = useCallback(() => {
     const track = state.localStream?.getVideoTracks()?.[0];
@@ -317,7 +313,7 @@ export const useWebRTCMesh = ({
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
 
-        getSocket().emit("webrtc-answer", {
+        socketService.socket?.emit("webrtc-answer", {
           type: "answer",
           sdp: answer.sdp,
           fromUserId: localUserId,
@@ -425,7 +421,6 @@ export const useWebRTCMesh = ({
     roomId,
     ensureLocalMedia,
     createPeerForUser,
-    getSocket,
     onLog,
     onError,
   ]);

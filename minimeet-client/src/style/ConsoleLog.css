@@ -1,0 +1,81 @@
+/* ConsoleLog Component - Compact Grid Area */
+
+.console-log {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.console-title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-shadow: var(--color-accent-glow);
+}
+
+.clear-button {
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  min-height: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.clear-button:hover {
+  background: var(--color-bg-modifier-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-secondary);
+}
+
+.log-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-entry {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-secondary);
+  border-left: 2px solid var(--color-border-secondary);
+  padding-left: var(--space-2);
+  transition: all var(--transition-fast) ease;
+}
+
+.log-entry:hover {
+  background: var(--color-bg-modifier-hover);
+  border-left-color: var(--color-accent);
+  margin-left: -var(--space-1);
+  padding-left: var(--space-3);
+}
+
+.log-entry:last-child {
+  margin-bottom: 0;
+}

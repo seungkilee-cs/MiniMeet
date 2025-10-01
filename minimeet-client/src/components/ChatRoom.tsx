@@ -25,7 +25,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   useEffect(() => {
     // Set up socket event listeners ONCE
     const handleNewMessage = (message: Message) => {
-      onLog(` New message from ${message.sender.username}`);
+      onLog(`New message from ${message.sender.username}`);
       setMessages((prev) => [...prev, message]);
     };
 
@@ -33,7 +33,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       roomId: string;
       participants: User[];
     }) => {
-      onLog(` Participants update: ${data.participants.length} users`);
+      onLog(`Participants update: ${data.participants.length} users`);
       setParticipants(data.participants);
     };
 
@@ -41,7 +41,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       roomId: string;
       messages: Message[];
     }) => {
-      onLog(` Loaded ${data.messages.length} previous messages`);
+      onLog(`Loaded ${data.messages.length} previous messages`);
       setMessages(data.messages);
     };
 
@@ -62,19 +62,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         socketService.socket.off("messageHistory", handleMessageHistory);
       }
     };
-  }, []); // Empty dependency array - run only once
-
-  // Separate effect for loading data when room changes
-  useEffect(() => {
-    if (roomId) {
-      // Clear previous room data
-      setMessages([]);
-      setParticipants([]);
-
-      // Load message history for new room
-      socketService.loadMessageHistory({ roomId, limit: 50 });
-    }
-  }, [roomId]); // Only depends on roomId
+  }, [roomId, onLog]); // Include onLog in the dependency array
 
   const handleSendMessage = () => {
     const content = messageInput.trim();
@@ -166,7 +154,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
           <button
             onClick={handleSendMessage}
             disabled={!messageInput.trim() || messageInput.length > 500}
-            className="send-button"
+            className="btn btn-primary"
           >
             Send
           </button>

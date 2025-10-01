@@ -1,4 +1,5 @@
 import React from "react";
+import "../style/ConnectionSection.css";
 
 interface ConnectionSectionProps {
   onConnect: () => void;
@@ -18,24 +19,26 @@ const ConnectionSection: React.FC<ConnectionSectionProps> = ({
   isConnected,
 }) => {
   return (
-    <div className="controls">
-      <h3>2. Connect & Join Room</h3>
-      <button onClick={onConnect} disabled={isConnected}>
-        {isConnected ? "Connected" : "Connect to Server"}
-      </button>
-      <input
-        type="text"
-        value={roomId}
-        onChange={(e) => onRoomIdChange(e.target.value)}
-        placeholder="Enter Room ID"
-        style={{ width: "300px" }}
-      />
-      <button onClick={onJoinRoom} disabled={!isConnected}>
-        Join Room
-      </button>
-      <button onClick={onLeaveRoom} disabled={!isConnected}>
-        Leave Room
-      </button>
+    <div className="connection-section">
+      <h3 className="connection-title">2. Connect & Join Room</h3>
+      <div className="connection-controls">
+        <button onClick={onConnect} className="connect-button" disabled={isConnected}>
+          {isConnected ? "Connected" : "Connect to Server"}
+        </button>
+        <input
+          type="text"
+          value={roomId}
+          onChange={(e) => onRoomIdChange(e.target.value)}
+          placeholder="Enter Room ID"
+          className="connection-input"
+        />
+        <button onClick={onJoinRoom} className="join-button" disabled={!isConnected}>
+          Join Room
+        </button>
+        <button onClick={onLeaveRoom} className="leave-button" disabled={!isConnected}>
+          Leave Room
+        </button>
+      </div>
     </div>
   );
 };

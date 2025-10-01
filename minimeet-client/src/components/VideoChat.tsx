@@ -1,5 +1,6 @@
 import React from "react";
 import { useWebRTC } from "../hooks/useWebRTC";
+import "../style/VideoChat.css";
 
 interface VideoChatProps {
   roomId: string;
@@ -27,28 +28,46 @@ const VideoChat: React.FC<VideoChatProps> = ({
   const others = participants.filter((p) => p.id !== currentUserId);
 
   return (
-    <div className="video-surface">
-      <h3 style={{ margin: 0, fontSize: 14, color: "#9aa3b2" }}>Video Chat</h3>
+    <div className="video-chat">
+      <h3 className="video-chat-title">Video Chat</h3>
 
       <div className="video-grid">
         <div className="video-tile">
-          <h4>You</h4>
-          <video ref={localVideoRef} autoPlay muted playsInline />
+          <h4 className="video-label">You</h4>
+          <video 
+            ref={localVideoRef} 
+            autoPlay 
+            muted 
+            playsInline 
+            className="video-element"
+          />
         </div>
         <div className="video-tile">
-          <h4>Remote</h4>
-          <video ref={remoteVideoRef} autoPlay playsInline />
+          <h4 className="video-label">Remote</h4>
+          <video 
+            ref={remoteVideoRef} 
+            autoPlay 
+            playsInline 
+            className="video-element"
+          />
         </div>
       </div>
 
-      <div className="controls-row">
+      <div className="video-controls">
         {others.map((p) => (
-          <button key={p.id} onClick={() => startCall(p.id)}>
+          <button 
+            key={p.id} 
+            onClick={() => startCall(p.id)}
+            className="call-button"
+          >
             Call {p.username}
           </button>
         ))}
         {isCallActive && (
-          <button className="btn-danger" onClick={endCall}>
+          <button 
+            className="end-call-button"
+            onClick={endCall}
+          >
             End Call
           </button>
         )}

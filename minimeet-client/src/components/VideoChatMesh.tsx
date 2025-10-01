@@ -1,10 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import { useWebRTCMesh } from "../hooks/useWebRTCMesh";
+import "../style/VideoChat.css";
+
+interface Participant {
+  id: string;
+  username: string;
+  email: string;
+}
 
 interface VideoChatMeshProps {
   roomId: string;
   currentUserId: string;
-  participants: Array<{ id: string; username: string; email: string }>;
+  participants?: Participant[];
   onLog: (message: string) => void;
   onError: (error: string) => void;
 }
@@ -12,13 +19,14 @@ interface VideoChatMeshProps {
 const VideoChatMesh: React.FC<VideoChatMeshProps> = ({
   roomId,
   currentUserId,
-  participants,
+  participants = [],
   onLog,
   onError,
 }) => {
+  const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  
   const {
     localVideoRef,
-    remoteStreamsRef,
     connectedUserIds,
     startMeshCall,
     endMeshCall,
@@ -35,52 +43,74 @@ const VideoChatMesh: React.FC<VideoChatMeshProps> = ({
     onError,
   });
 
-  const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const others = participants.filter((p: Participant) => p.id !== currentUserId);
+  const totalParticipants = connectedUserIds.length + (isCallActive ? 1 : 0);
 
   // Update remote video elements when streams change
   useEffect(() => {
-    remoteStreams.forEach((stream, userId) => {
+    remoteStreams.forEach((stream: MediaStream, userId: string) => {
       const videoElement = remoteVideoRefs.current.get(userId);
-      if (videoElement && videoElement.srcObject !== stream) {
+      if (videoElement && stream) {
         videoElement.srcObject = stream;
       }
     });
   }, [remoteStreams]);
 
-  const others = participants.filter((p) => p.id !== currentUserId);
-  const totalParticipants = connectedUserIds.length + (isCallActive ? 1 : 0);
-
   return (
-    <div className="video-surface">
-      <h3 style={{ margin: 0, fontSize: 14, color: "#9aa3b2" }}>
-        Video Chat - Mesh Topology (Up to 4 people)
-      </h3>
+    <div className="video-chat">
+      <h2>
+        Video Chat - Mesh{isCallActive && `: Active call with ${totalParticipants} participant${totalParticipants !== 1 ? "s" : ""}`}
+      </h2>
 
-      {isCallActive && (
-        <div className="call-info">
-          <span>
-            Active call with {connectedUserIds.length} participant
-            {connectedUserIds.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
+      {/* Controls Section */}
+      <div className="video-controls-section">
+        {isCallActive ? (
+          <>
+            <button
+              onClick={toggleVideo}
+              className={`toggle-button ${isLocalVideoEnabled ? 'active' : ''}`}
+            >
+              Video {isLocalVideoEnabled ? "On" : "Off"}
+            </button>
+
+            <button
+              onClick={toggleAudio}
+              className={`toggle-button ${isLocalAudioEnabled ? 'active' : ''}`}
+            >
+              Mic {isLocalAudioEnabled ? "On" : "Off"}
+            </button>
+
+            <button className="end-call-button" onClick={endMeshCall}>
+              End Call
+            </button>
+          </>
+        ) : others.length > 0 ? (
+          <button onClick={startMeshCall} className="call-button">
+            Start Call ({others.length + 1})
+          </button>
+        ) : (
+          <div className="video-waiting-message">
+            Waiting for participants to join...
+          </div>
+        )}
+      </div>
 
       <div className={`video-grid video-grid-${totalParticipants}`}>
         {/* Local video */}
         <div className="video-tile local-video">
-          <h4>You</h4>
-          <video ref={localVideoRef} autoPlay muted playsInline />
+          <div className="video-label">You</div>
+          <video ref={localVideoRef} autoPlay muted playsInline className="video-element" />
           {!isLocalVideoEnabled && (
             <div className="video-overlay">Video Off</div>
           )}
         </div>
 
         {/* Remote videos - one per connected participant */}
-        {connectedUserIds.map((userId) => {
+        {connectedUserIds.map((userId: string) => {
           const participant = participants.find((p) => p.id === userId);
           return (
             <div key={userId} className="video-tile remote-video">
-              <h4>{participant?.username || "User"}</h4>
+              <div className="video-label">{participant?.username || "User"}</div>
               <video
                 ref={(el) => {
                   if (el) {
@@ -93,47 +123,18 @@ const VideoChatMesh: React.FC<VideoChatMeshProps> = ({
                 }}
                 autoPlay
                 playsInline
+                className="video-element"
               />
             </div>
           );
         })}
       </div>
-
-      <div className="controls-row">
-        {!isCallActive && others.length > 0 && (
-          <button onClick={startMeshCall} className="btn-primary">
-            Start Group Call ({others.length + 1} people)
-          </button>
-        )}
-
-        {isCallActive && (
-          <>
-            <button
-              onClick={toggleVideo}
-              className={isLocalVideoEnabled ? "btn-secondary" : "btn-warning"}
-            >
-              {isLocalVideoEnabled ? "📹 Video On" : "📹 Video Off"}
-            </button>
-
-            <button
-              onClick={toggleAudio}
-              className={isLocalAudioEnabled ? "btn-secondary" : "btn-warning"}
-            >
-              {isLocalAudioEnabled ? "🎤 Mic On" : "🎤 Mic Off"}
-            </button>
-
-            <button className="btn-danger" onClick={endMeshCall}>
-              End Call
-            </button>
-          </>
-        )}
-
-        {!isCallActive && others.length === 0 && (
-          <div className="info-message">
-            Waiting for other participants to join...
-          </div>
-        )}
-      </div>
+      
+      {!isCallActive && others.length === 0 && (
+        <div className="video-waiting-message">
+          Waiting for other participants...
+        </div>
+      )}
     </div>
   );
 };

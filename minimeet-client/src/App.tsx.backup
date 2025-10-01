@@ -6,7 +6,7 @@ import VideoChatMesh from "./components/VideoChatMesh";
 import AuthSection from "./components/AuthSection";
 import ConnectionSection from "./components/ConnectionSection";
 import StatusDisplay from "./components/StatusDisplay";
-import ThemeToggle from "./components/ThemeToggle";
+import ConsoleLog from "./components/ConsoleLog";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Not connected");
   const [error, setError] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
   const [participants, setParticipants] = useState<
     Array<{ id: string; username: string; email: string }>
   >([]);
@@ -27,7 +28,9 @@ const App: React.FC = () => {
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    console.log(`[${timestamp}] ${message}`);
+    const logMessage = `[${timestamp}] ${message}`;
+    setLogs((prev) => [...prev, logMessage]);
+    console.log(logMessage);
   }, []);
 
   const showError = useCallback((message: string) => {
@@ -78,27 +81,27 @@ const App: React.FC = () => {
       showError(`Authentication failed: ${data.message}`);
     });
 
-    socketService.onJoinSuccess((data: { roomId: string }) => {
+    socketService.onJoinSuccess((data) => {
       addLog(`Successfully joined room: ${data.roomId}`);
       setCurrentRoomId(data.roomId);
     });
 
-    socketService.onLeaveSuccess((data: { roomId: string }) => {
+    socketService.onLeaveSuccess((data) => {
       addLog(`Successfully left room: ${data.roomId}`);
       setCurrentRoomId("");
     });
 
-    socketService.onJoinError((data: { error: string }) => {
+    socketService.onJoinError((data) => {
       addLog(`Failed to join room: ${data.error}`);
       showError(`Failed to join room: ${data.error}`);
     });
 
-    socketService.onLeaveError((data: { error: string }) => {
+    socketService.onLeaveError((data) => {
       addLog(`Failed to leave room: ${data.error}`);
       showError(`Failed to leave room: ${data.error}`);
     });
 
-    socketService.onMessageError((data: { error: string }) => {
+    socketService.onMessageError((data) => {
       addLog(`Message error: ${data.error}`);
       let userMessage = data.error;
       if (data.error.includes("too long")) {
@@ -113,7 +116,7 @@ const App: React.FC = () => {
       showError(userMessage);
     });
 
-    socketService.onParticipantsUpdate((data: { participants: Array<{ id: string; username: string; email: string }> }) => {
+    socketService.onParticipantsUpdate((data) => {
       setParticipants(data.participants);
       addLog(`Participants update: ${data.participants.length} users`);
     });
@@ -152,65 +155,50 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>MiniMeet</h1>
-        <div className="app-header-actions">
-          <StatusDisplay status={status} error={error} />
-          <ThemeToggle />
-        </div>
+        <h1>MiniMeet Client</h1>
       </header>
 
       <main className="app-main">
-        <aside className="app-sidebar">
-          <AuthSection
-            userId={userId}
-            token={token}
-            onUserIdChange={setUserId}
-            onGetToken={handleGetToken}
-          />
+        <AuthSection
+          userId={userId}
+          token={token}
+          onUserIdChange={setUserId}
+          onGetToken={handleGetToken}
+        />
 
-          <ConnectionSection
-            isConnected={isConnected}
-            roomId={roomId}
-            onRoomIdChange={setRoomId}
-            onConnect={handleConnect}
-            onJoinRoom={handleJoinRoom}
-            onLeaveRoom={handleLeaveRoom}
-          />
-        </aside>
+        <ConnectionSection
+          isConnected={isConnected}
+          roomId={roomId}
+          onRoomIdChange={setRoomId}
+          onConnect={handleConnect}
+          onJoinRoom={handleJoinRoom}
+          onLeaveRoom={handleLeaveRoom}
+        />
 
-        <div className={`app-content ${!currentRoomId || participants.length === 0 ? 'no-video' : ''}`}>
-          {currentRoomId && currentUser ? (
-            <>
-              <div className="chat-section-wrapper">
-                <ChatRoom
-                  roomId={currentRoomId}
-                  currentUserId={currentUser.id}
-                  onLog={addLog}
-                  onError={showError}
-                />
-              </div>
+        <StatusDisplay status={status} error={error} />
 
-              {participants.length > 0 && (
-                <div className="video-section-wrapper">
-                  <VideoChatMesh
-                    roomId={currentRoomId}
-                    currentUserId={currentUser.id}
-                    participants={participants}
-                    onLog={addLog}
-                    onError={showError}
-                  />
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="no-room-message">
-              <h3>No Active Room</h3>
-              <p>Connect to a server and join a room to start chatting</p>
+        {currentRoomId && currentUser && (
+          <>
+            <div className="chat-surface">
+              <ChatRoom
+                roomId={currentRoomId}
+                currentUserId={currentUser.id}
+                onLog={addLog}
+                onError={showError}
+              />
             </div>
-          )}
-        </div>
 
-        {/* <ConsoleLog logs={logs} /> */}
+            <VideoChatMesh
+              roomId={currentRoomId}
+              currentUserId={currentUser.id}
+              participants={participants}
+              onLog={addLog}
+              onError={showError}
+            />
+          </>
+        )}
+
+        <ConsoleLog logs={logs} />
       </main>
     </div>
   );

@@ -40,14 +40,20 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
 
     setIsSearching(true);
     try {
-      onLog(`Searching for: "${query}"`);
+      onLog(`Searching for: "${query}" in ${roomId ? 'current room' : 'all rooms'}`);
       const response = await apiClient.searchMessages(query, roomId);
-      setResults(response.results);
+      setResults(response.results || []);
       setShowResults(true);
-      onLog(`Found ${response.resultCount} results`);
+      onLog(`Search completed: ${response.resultCount || 0} results found`);
+      
+      if (!response.results || response.results.length === 0) {
+        onLog(`⚠️ No results found. Backend search may not be configured.`);
+      }
     } catch (error: any) {
-      onError(`Search failed: ${error.message}`);
-      onLog(`Search error: ${error.message}`);
+      onError(`Search failed: ${error.message || 'Unknown error'}`);
+      onLog(`❌ Search error: ${error.message}. Check if backend /search/messages endpoint is implemented.`);
+      setResults([]);
+      setShowResults(true);
     } finally {
       setIsSearching(false);
     }
@@ -82,11 +88,11 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
           disabled={isSearching || !query.trim()}
           className="search-button"
         >
-          {isSearching ? "Searching..." : "🔍 Search"}
+          {isSearching ? "Searching..." : "Search"}
         </button>
         {(showResults || query) && (
           <button onClick={handleClear} className="clear-button">
-            ✕ Clear
+            Clear
           </button>
         )}
       </div>

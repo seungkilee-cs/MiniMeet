@@ -1,0 +1,307 @@
+import React, { useState, useCallback, useEffect } from "react";
+import { apiClient } from "./services/api";
+import { socketService } from "./services/socket";
+import ChatRoom from "./components/ChatRoom";
+import VideoChatMesh from "./components/VideoChatMesh";
+import AuthSection from "./components/AuthSection";
+import ConnectionSection from "./components/ConnectionSection";
+import StatusDisplay from "./components/StatusDisplay";
+import ConsoleLog from "./components/ConsoleLog";
+import ThemeToggle from "./components/ThemeToggle";
+import "./App.css";
+
+const App: React.FC = () => {
+  const [token, setToken] = useState("");
+  const [userId, setUserId] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [currentRoomId, setCurrentRoomId] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [status, setStatus] = useState("Not connected");
+  const [error, setError] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<
+    Array<{ id: string; username: string; email: string }>
+  >([]);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    username: string;
+  } | null>(null);
+
+  const addLog = useCallback((message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logMessage = `[${timestamp}] ${message}`;
+    setLogs((prev) => [...prev, logMessage]);
+    console.log(logMessage);
+  }, []);
+
+  const showError = useCallback((message: string) => {
+    setError(message);
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError("");
+  }, []);
+
+  const handleGetToken = useCallback(async () => {
+    if (!userId.trim()) {
+      showError("Please enter a User ID");
+      return;
+    }
+
+    try {
+      const newToken = await apiClient.getToken(userId.trim());
+      setToken(newToken);
+      setCurrentUser({ id: userId, username: `User${userId.slice(0, 4)}` });
+      addLog(`Token obtained for user ${userId}`);
+    } catch (error: any) {
+      addLog(`Token error: ${error.message}`);
+      showError(error.message);
+    }
+  }, [userId, addLog, showError]);
+
+  const handleConnect = useCallback(() => {
+    if (!token) {
+      showError("Please get a token first");
+      return;
+    }
+
+    const socket = socketService.connect(token);
+
+    socket.on("connect", () => {
+      addLog(`Connected! Socket ID: ${socket.id}`);
+      setStatus("Connected and authenticated");
+      setIsConnected(true);
+      setCurrentUser({ id: userId, username: userId });
+    });
+
+    socket.on("disconnect", () => {
+      addLog("Disconnected from server");
+      setStatus("Disconnected");
+      setIsConnected(false);
+      setCurrentRoomId("");
+    });
+
+    socket.on("authError", (data: any) => {
+      addLog(`Auth error: ${data.message}`);
+      showError(`Authentication failed: ${data.message}`);
+    });
+
+    socketService.onJoinSuccess((data) => {
+      addLog(`Successfully joined room: ${data.roomId}`);
+      setCurrentRoomId(data.roomId);
+    });
+
+    socketService.onLeaveSuccess((data) => {
+      addLog(`Successfully left room: ${data.roomId}`);
+      setCurrentRoomId("");
+    });
+
+    socketService.onJoinError((data) => {
+      addLog(`Failed to join room: ${data.error}`);
+      showError(`Failed to join room: ${data.error}`);
+    });
+
+    socketService.onLeaveError((data) => {
+      addLog(`Failed to leave room: ${data.error}`);
+      showError(`Failed to leave room: ${data.error}`);
+    });
+
+    socketService.onMessageError((data) => {
+      addLog(`Message error: ${data.error}`);
+      let userMessage = data.error;
+      if (data.error.includes("too long")) {
+        userMessage =
+          "Message is too long (max 500 characters). Please shorten it.";
+      } else if (
+        data.error.includes("empty") ||
+        data.error.includes("too short")
+      ) {
+        userMessage = "Message cannot be empty. Please enter some text.";
+      }
+      showError(userMessage);
+    });
+
+    socketService.onParticipantsUpdate((data) => {
+      setParticipants(data.participants);
+      addLog(`Participants update: ${data.participants.length} users`);
+    });
+  }, [token, userId, addLog, showError]);
+
+  const handleJoinRoom = useCallback(() => {
+    if (!isConnected) {
+      showError("Please connect first");
+      return;
+    }
+
+    if (!roomId.trim()) {
+      showError("Please enter a Room ID");
+      return;
+    }
+
+    addLog(`Joining room: ${roomId}`);
+    socketService.joinRoom(roomId.trim());
+  }, [isConnected, roomId, addLog, showError]);
+
+  const handleLeaveRoom = useCallback(() => {
+    if (!isConnected) {
+      showError("Please connect first");
+      return;
+    }
+
+    if (!currentRoomId) {
+      showError("Not in any room");
+      return;
+    }
+
+    addLog(`Leaving room: ${currentRoomId}`);
+    socketService.leaveRoom(currentRoomId);
+  }, [isConnected, currentRoomId, addLog, showError]);
+
+  const handleSendMessage = useCallback((content: string) => {
+    if (!isConnected) {
+      showError("Not connected to any room");
+      return;
+    }
+    socketService.sendMessage({ content, roomId: currentRoomId });
+    addLog(`You: ${content}`);
+  }, [isConnected, addLog, showError]);
+
+  // Effect for socket events
+  useEffect(() => {
+    const onUserJoined = (user: any) => {
+      setParticipants(prev => [...prev, user]);
+      addLog(`User joined: ${user.username} (${user.id})`);
+    };
+
+    const onUserLeft = (userId: string) => {
+      setParticipants(prev => prev.filter(p => p.id !== userId));
+      addLog(`User left: ${userId}`);
+    };
+
+    const onMessage = (message: any) => {
+      addLog(`${message.sender.username}: ${message.content}`);
+    };
+
+    socketService.on("userJoined", onUserJoined);
+    socketService.on("userLeft", onUserLeft);
+    socketService.on("message", onMessage);
+
+    return () => {
+      socketService.off("userJoined", onUserJoined);
+      socketService.off("userLeft", onUserLeft);
+      socketService.off("message", onMessage);
+    };
+  }, [addLog]);
+
+  return (
+    <div className="app-container">
+      <div className="main-content">
+        <header className="app-header">
+          <h1 className="app-title">
+            <span>MiniMeet</span>
+            <span className="badge">Beta</span>
+          </h1>
+          <div className="app-actions">
+            <ThemeToggle />
+            <StatusDisplay status={status} isConnected={isConnected} />
+          </div>
+        </header>
+
+        <div className="content-wrapper">
+          <aside className="sidebar">
+            <AuthSection
+              userId={userId}
+              onUserIdChange={setUserId}
+              onGetToken={handleGetToken}
+              token={token}
+            />
+
+            <ConnectionSection
+              isConnected={isConnected}
+              roomId={roomId}
+              onRoomIdChange={setRoomId}
+              onConnect={handleConnect}
+              onJoinRoom={handleJoinRoom}
+              onLeaveRoom={handleLeaveRoom}
+            />
+
+            {error && (
+              <div className="error-message fade-in">
+                <span>{error}</span>
+                <button onClick={clearError} aria-label="Dismiss error">
+                  ✕
+                </button>
+              </div>
+            )}
+
+            <div className="section">
+              <h3 className="section-title">Room Participants</h3>
+              <div className="participants-list">
+                {participants.length === 0 ? (
+                  <p className="text-muted">No participants in the room</p>
+                ) : (
+                  participants.map((p) => (
+                    <div key={p.id} className="participant-item">
+                      <div className="participant-name">{p.username}</div>
+                      <div className="participant-email">{p.email}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </aside>
+
+          <main className="main-panel">
+            <div className="chat-container">
+              {currentRoomId && currentUser ? (
+                <>
+                  <ChatRoom
+                    roomId={currentRoomId}
+                    participants={participants}
+                    onSendMessage={handleSendMessage}
+                    messages={[]} // You'll need to implement message state
+                    onLog={addLog}
+                    onError={showError}
+                  />
+
+                  <VideoChatMesh
+                    roomId={currentRoomId}
+                    currentUserId={currentUser.id}
+                    participants={participants}
+                    onLog={addLog}
+                    onError={showError}
+                  />
+                </>
+              ) : (
+                <div className="section" className="welcome-section">
+                  <div className="welcome-content">
+                    <h3>Welcome to MiniMeet</h3>
+                    <p>Get started by connecting to a room</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+
+        <footer className="status-bar">
+          <div className="connection-status">
+            {isConnected ? (
+              <span className="status-connected">● Connected</span>
+            ) : (
+              <span className="status-disconnected">● Disconnected</span>
+            )}
+          </div>
+          <div className="log-count">{logs.length} log entries</div>
+        </footer>
+      </div>
+
+      <ConsoleLog 
+        logs={logs} 
+        onClear={() => setLogs([])} 
+      />
+    </div>
+  );
+};
+
+export default App;

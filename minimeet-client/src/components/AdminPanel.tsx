@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
+import ThemeToggle from './ThemeToggle';
 import { apiClient } from "../services/api";
-import "../style/AdminPanel.css";
 
 interface AdminUser {
   id: string;
@@ -39,15 +39,11 @@ const AdminPanel: React.FC = () => {
   const [roomForm, setRoomForm] = useState({
     id: "",
     name: "",
-    maxParticipants: 4,
+    maxParticipants: 10,
   });
   const [isEditingRoom, setIsEditingRoom] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [activeTab]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -63,7 +59,11 @@ const AdminPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const showSuccess = (message: string) => {
     setSuccess(message);
@@ -222,323 +222,429 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="admin-panel">
-      <div className="admin-header">
-        <h1>🔧 Admin Panel</h1>
-        <div className="dev-badge">DEVELOPMENT ONLY</div>
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Header Card */}
+      <div className="card">
+        <div className="card-body">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">🔧 Admin Panel</h1>
+              <p className="text-secondary mt-1">Manage users, rooms, and participants</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <span className="badge badge-warning font-semibold">
+                DEVELOPMENT ONLY
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
+      {/* Alerts */}
+      {error && (
+        <div className="card border-danger">
+          <div className="card-body">
+            <div className="flex items-center gap-3">
+              <div className="text-xl">⚠️</div>
+              <div>
+                <h3 className="font-semibold text-danger">Error</h3>
+                <p className="text-secondary">{error}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="admin-tabs">
-        <button
-          className={`tab ${activeTab === "users" ? "active" : ""}`}
-          onClick={() => setActiveTab("users")}
-        >
-          👥 Users
-        </button>
-        <button
-          className={`tab ${activeTab === "rooms" ? "active" : ""}`}
-          onClick={() => setActiveTab("rooms")}
-        >
-          🏠 Rooms
-        </button>
-        <button
-          className={`tab ${activeTab === "participants" ? "active" : ""}`}
-          onClick={() => setActiveTab("participants")}
-        >
-          👨‍👩‍👧‍👦 Participants
-        </button>
+      {success && (
+        <div className="card border-success">
+          <div className="card-body">
+            <div className="flex items-center gap-3">
+              <div className="text-xl">✅</div>
+              <div>
+                <h3 className="font-semibold text-success">Success</h3>
+                <p className="text-secondary">{success}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Tabs */}
+      <div className="card">
+        <div className="card-body">
+          <div className="flex gap-1">
+            <button
+              className={`flex-1 btn ${activeTab === "users" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveTab("users")}
+            >
+              👥 Users
+            </button>
+            <button
+              className={`flex-1 btn ${activeTab === "rooms" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveTab("rooms")}
+            >
+              🏠 Rooms
+            </button>
+            <button
+              className={`flex-1 btn ${activeTab === "participants" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveTab("participants")}
+            >
+              👨‍👩‍👧‍👦 Participants
+            </button>
+          </div>
+        </div>
       </div>
 
       {activeTab === "users" && (
-        <div className="admin-content">
-          <div className="admin-form">
-            <h2>{isEditingUser ? "Edit User" : "Create New User"}</h2>
-            <div className="form-group">
-              <label>Username</label>
-              <input
-                type="text"
-                value={userForm.username}
-                onChange={(e) =>
-                  setUserForm({ ...userForm, username: e.target.value })
-                }
-                placeholder="Enter username"
-              />
+        <div className="space-y-6">
+          {/* Create/Edit User Card */}
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-lg font-semibold">{isEditingUser ? "Edit User" : "Create New User"}</h2>
             </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={userForm.email}
-                onChange={(e) =>
-                  setUserForm({ ...userForm, email: e.target.value })
-                }
-                placeholder="Enter email"
-              />
-            </div>
-            <div className="form-group checkbox">
-              <label>
+            <div className="card-body">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-secondary mb-2">Username</label>
+                  <input
+                    type="text"
+                    value={userForm.username}
+                    onChange={(e) =>
+                      setUserForm({ ...userForm, username: e.target.value })
+                    }
+                    className="input"
+                    placeholder="Enter username"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={userForm.email}
+                    onChange={(e) =>
+                      setUserForm({ ...userForm, email: e.target.value })
+                    }
+                    className="input"
+                    placeholder="Enter email"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
                 <input
                   type="checkbox"
+                  id="user-active"
                   checked={userForm.isActive}
                   onChange={(e) =>
                     setUserForm({ ...userForm, isActive: e.target.checked })
                   }
+                  className="rounded border-secondary"
                 />
-                Active
-              </label>
+                <label htmlFor="user-active" className="text-sm font-medium">Active</label>
+              </div>
             </div>
-            <div className="form-actions">
+            <div className="card-footer justify-between">
+              <div></div>
               {isEditingUser ? (
-                <>
-                  <button onClick={handleUpdateUser} className="btn-primary">
-                    Update User
-                  </button>
-                  <button onClick={cancelEdit} className="btn-secondary">
+                <div className="flex gap-2">
+                  <button onClick={cancelEdit} className="btn btn-secondary">
                     Cancel
                   </button>
-                </>
+                  <button onClick={handleUpdateUser} className="btn btn-primary">
+                    Update User
+                  </button>
+                </div>
               ) : (
-                <button onClick={handleCreateUser} className="btn-primary">
+                <button onClick={handleCreateUser} className="btn btn-primary">
                   Create User
                 </button>
               )}
             </div>
           </div>
 
-          <div className="admin-list">
-            <h2>All Users ({users.length})</h2>
-            {loading ? (
-              <div className="loading">Loading...</div>
-            ) : (
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td>
-                        <div className="id-cell">
-                          <code>{user.id.substring(0, 8)}...</code>
-                          <button
-                            onClick={() => copyToClipboard(user.id, "User ID")}
-                            className="btn-copy"
-                            title="Copy full ID"
-                          >
-                            📋
-                          </button>
-                        </div>
-                      </td>
-                      <td>{user.username}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span
-                          className={`status ${user.isActive ? "active" : "inactive"}`}
-                        >
-                          {user.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                      <td>
-                        <button
-                          onClick={() => handleEditUser(user)}
-                          className="btn-small btn-edit"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="btn-small btn-delete"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+          {/* Users List Card */}
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-lg font-semibold">All Users ({users.length})</h2>
+            </div>
+            <div className="card-body">
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-2 text-secondary">Loading...</span>
+                </div>
+              ) : (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border-subtle">
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">ID</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Username</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Email</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Status</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Created</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((user) => (
+                        <tr key={user.id} className="border-b border-border-subtle hover:bg-bg-tertiary">
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs bg-bg-tertiary px-2 py-1 rounded text-secondary">
+                                {user.id.substring(0, 8)}...
+                              </code>
+                              <button
+                                onClick={() => copyToClipboard(user.id, "User ID")}
+                                className="btn btn-sm btn-ghost p-1"
+                                title="Copy full ID"
+                              >
+                                📋
+                              </button>
+                            </div>
+                          </td>
+                          <td className="p-3 font-medium">{user.username}</td>
+                          <td className="p-3 text-secondary">{user.email}</td>
+                          <td className="p-3">
+                            <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
+                              {user.isActive ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="p-3 text-secondary text-sm">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditUser(user)}
+                                className="btn btn-sm btn-ghost"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user.id)}
+                                className="btn btn-sm btn-danger"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {activeTab === "rooms" && (
-        <div className="admin-content">
-          <div className="admin-form">
-            <h2>{isEditingRoom ? "Edit Room" : "Create New Room"}</h2>
-            <div className="form-group">
-              <label>Room Name</label>
-              <input
-                type="text"
-                value={roomForm.name}
-                onChange={(e) =>
-                  setRoomForm({ ...roomForm, name: e.target.value })
-                }
-                placeholder="Enter room name"
-              />
+        <div className="space-y-6">
+          {/* Create/Edit Room Card */}
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-lg font-semibold">{isEditingRoom ? "Edit Room" : "Create New Room"}</h2>
             </div>
-            <div className="form-group">
-              <label>Max Participants</label>
-              <input
-                type="number"
-                min="2"
-                max="10"
-                value={roomForm.maxParticipants}
-                onChange={(e) =>
-                  setRoomForm({
-                    ...roomForm,
-                    maxParticipants: parseInt(e.target.value),
-                  })
-                }
-              />
+            <div className="card-body">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-secondary mb-2">Room Name</label>
+                  <input
+                    type="text"
+                    value={roomForm.name}
+                    onChange={(e) =>
+                      setRoomForm({ ...roomForm, name: e.target.value })
+                    }
+                    className="input"
+                    placeholder="Enter room name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary mb-2">Max Participants</label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="10"
+                    value={roomForm.maxParticipants}
+                    onChange={(e) =>
+                      setRoomForm({
+                        ...roomForm,
+                        maxParticipants: parseInt(e.target.value),
+                      })
+                    }
+                    className="input"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="form-actions">
+            <div className="card-footer justify-between">
+              <div></div>
               {isEditingRoom ? (
-                <>
-                  <button onClick={handleUpdateRoom} className="btn-primary">
-                    Update Room
-                  </button>
-                  <button onClick={cancelEdit} className="btn-secondary">
+                <div className="flex gap-2">
+                  <button onClick={cancelEdit} className="btn btn-secondary">
                     Cancel
                   </button>
-                </>
+                  <button onClick={handleUpdateRoom} className="btn btn-primary">
+                    Update Room
+                  </button>
+                </div>
               ) : (
-                <button onClick={handleCreateRoom} className="btn-primary">
+                <button onClick={handleCreateRoom} className="btn btn-primary">
                   Create Room
                 </button>
               )}
             </div>
           </div>
 
-          <div className="admin-list">
-            <h2>All Rooms ({rooms.length})</h2>
-            {loading ? (
-              <div className="loading">Loading...</div>
-            ) : (
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Max Participants</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rooms.map((room) => (
-                    <tr key={room.id}>
-                      <td>
-                        <div className="id-cell">
-                          <code>{room.id.substring(0, 8)}...</code>
-                          <button
-                            onClick={() => copyToClipboard(room.id, "Room ID")}
-                            className="btn-copy"
-                            title="Copy full ID"
-                          >
-                            📋
-                          </button>
-                        </div>
-                      </td>
-                      <td>{room.name}</td>
-                      <td>{room.maxParticipants}</td>
-                      <td>{new Date(room.createdAt).toLocaleDateString()}</td>
-                      <td>
-                        <button
-                          onClick={() => handleEditRoom(room)}
-                          className="btn-small btn-edit"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteRoom(room.id)}
-                          className="btn-small btn-delete"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+          {/* Rooms List Card */}
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-lg font-semibold">All Rooms ({rooms.length})</h2>
+            </div>
+            <div className="card-body">
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-2 text-secondary">Loading...</span>
+                </div>
+              ) : (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border-subtle">
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">ID</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Name</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Max Participants</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Created</th>
+                        <th className="text-left p-3 text-sm font-semibold text-secondary">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rooms.map((room) => (
+                        <tr key={room.id} className="border-b border-border-subtle hover:bg-bg-tertiary">
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs bg-bg-tertiary px-2 py-1 rounded text-secondary">
+                                {room.id.substring(0, 8)}...
+                              </code>
+                              <button
+                                onClick={() => copyToClipboard(room.id, "Room ID")}
+                                className="btn btn-sm btn-ghost p-1"
+                                title="Copy full ID"
+                              >
+                                📋
+                              </button>
+                            </div>
+                          </td>
+                          <td className="p-3 font-medium">{room.name}</td>
+                          <td className="p-3 text-secondary">{room.maxParticipants}</td>
+                          <td className="p-3 text-secondary text-sm">
+                            {new Date(room.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditRoom(room)}
+                                className="btn btn-sm btn-ghost"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteRoom(room.id)}
+                                className="btn btn-sm btn-danger"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {activeTab === "participants" && (
-        <div className="admin-content-full">
-          <div className="admin-list">
-            <h2>Room Participants</h2>
-            {loading ? (
-              <div className="loading">Loading...</div>
-            ) : (
-              <div className="participants-grid">
-                {rooms.map((room) => (
-                  <div key={room.id} className="room-card">
-                    <div className="room-card-header">
-                      <h3>{room.name}</h3>
-                      <span className="participant-count">
-                        {room.participants?.length || 0} / {room.maxParticipants}
-                      </span>
+        <div className="space-y-6">
+          <div className="card">
+            <div className="card-header">
+              <h2 className="text-lg font-semibold">Room Participants</h2>
+            </div>
+            <div className="card-body">
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-2 text-secondary">Loading...</span>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {rooms.map((room) => (
+                    <div key={room.id} className="card border-border-subtle">
+                      <div className="card-header">
+                        <h3 className="text-base font-semibold">{room.name}</h3>
+                        <span className="badge badge-primary">
+                          {room.participants?.length || 0} / {room.maxParticipants}
+                        </span>
+                      </div>
+                      <div className="card-body">
+                        {room.participants && room.participants.length > 0 ? (
+                          <div className="overflow-x-auto custom-scrollbar">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-border-subtle">
+                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Username</th>
+                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Email</th>
+                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Status</th>
+                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {room.participants.map((participant) => (
+                                  <tr key={participant.id} className="border-b border-border-subtle hover:bg-bg-tertiary">
+                                    <td className="p-3 font-medium">{participant.username}</td>
+                                    <td className="p-3 text-secondary">{participant.email}</td>
+                                    <td className="p-3">
+                                      <span className={`badge ${participant.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                        {participant.isActive ? "Active" : "Inactive"}
+                                      </span>
+                                    </td>
+                                    <td className="p-3">
+                                      <button
+                                        onClick={() =>
+                                          handleEvictUser(
+                                            room.id,
+                                            participant.id,
+                                            participant.username
+                                          )
+                                        }
+                                        className="btn btn-sm btn-danger"
+                                      >
+                                        Evict
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-secondary">
+                            <div className="text-2xl mb-2">👥</div>
+                            <p>No participants in this room</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {room.participants && room.participants.length > 0 ? (
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {room.participants.map((participant) => (
-                            <tr key={participant.id}>
-                              <td>{participant.username}</td>
-                              <td>{participant.email}</td>
-                              <td>
-                                <span
-                                  className={`status ${participant.isActive ? "active" : "inactive"}`}
-                                >
-                                  {participant.isActive ? "Active" : "Inactive"}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  onClick={() =>
-                                    handleEvictUser(
-                                      room.id,
-                                      participant.id,
-                                      participant.username
-                                    )
-                                  }
-                                  className="btn-small btn-delete"
-                                >
-                                  Evict
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="empty-state">No participants in this room</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

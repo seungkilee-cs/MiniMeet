@@ -1,0 +1,217 @@
+/* Synthwave/Cyberpunk TUI Theme System */
+
+:root {
+  --theme: dark;
+}
+
+/* Dark Theme (Synthwave/Cyberpunk) */
+[data-theme="dark"],
+:root:not([data-theme]) {
+  /* Synthwave Primary Colors - Neon Pink/Purple */
+  --color-primary: #ff006e;
+  --color-primary-hover: #ff1a80;
+  --color-primary-light: rgba(255, 0, 110, 0.15);
+  --color-primary-dark: #d9005c;
+  --color-primary-glow: 0 0 20px rgba(255, 0, 110, 0.5);
+  
+  /* Accent Colors - Cyan/Teal */
+  --color-accent: #00f5ff;
+  --color-accent-hover: #1affff;
+  --color-accent-glow: 0 0 20px rgba(0, 245, 255, 0.5);
+  
+  /* Secondary - Purple */
+  --color-secondary: #b537f2;
+  --color-secondary-hover: #c44dff;
+  
+  /* Background Colors - Dark with slight blue tint */
+  --color-bg-primary: #0a0e27;
+  --color-bg-secondary: #0f1729;
+  --color-bg-tertiary: #1a1f3a;
+  --color-bg-elevated: #0f1729;
+  --color-bg-modifier-hover: rgba(255, 0, 110, 0.08);
+  --color-bg-modifier-active: rgba(255, 0, 110, 0.15);
+  --color-bg-modifier-selected: rgba(255, 0, 110, 0.2);
+  
+  /* Text Colors */
+  --color-text-primary: #e0e7ff;
+  --color-text-secondary: #a0aec0;
+  --color-text-tertiary: #718096;
+  --color-text-muted: #4a5568;
+  --color-text-link: #00f5ff;
+  --color-text-positive: #00ff9f;
+  --color-text-warning: #ffb800;
+  --color-text-danger: #ff006e;
+  
+  /* Border Colors - Neon glow effect */
+  --color-border-primary: #2d3748;
+  --color-border-secondary: #1a202c;
+  --color-border-tertiary: #0f1729;
+  --color-border-neon: #ff006e;
+  --color-border-cyan: #00f5ff;
+  
+  /* Semantic Colors - Synthwave palette */
+  --color-success: #00ff9f;
+  --color-success-hover: #00e68a;
+  --color-success-glow: 0 0 20px rgba(0, 255, 159, 0.5);
+  --color-warning: #ffb800;
+  --color-warning-hover: #ffc933;
+  --color-warning-glow: 0 0 20px rgba(255, 184, 0, 0.5);
+  --color-danger: #ff006e;
+  --color-danger-hover: #ff1a80;
+  --color-danger-glow: 0 0 20px rgba(255, 0, 110, 0.5);
+  --color-info: #00f5ff;
+  --color-info-hover: #1affff;
+  --color-info-glow: 0 0 20px rgba(0, 245, 255, 0.5);
+  
+  /* Status Colors */
+  --color-status-online: #00ff9f;
+  --color-status-idle: #ffb800;
+  --color-status-dnd: #ff006e;
+  --color-status-offline: #4a5568;
+  
+  /* Interactive Colors */
+  --color-interactive-normal: #a0aec0;
+  --color-interactive-hover: #e0e7ff;
+  --color-interactive-active: #00f5ff;
+  --color-interactive-muted: #4a5568;
+  
+  /* TUI Grid Colors */
+  --color-grid: rgba(0, 245, 255, 0.1);
+  --color-scanline: rgba(0, 245, 255, 0.03);
+}
+
+/* Light Theme (Retro Synthwave Light) */
+[data-theme="light"] {
+  /* Primary Colors */
+  --color-primary: #ff006e;
+  --color-primary-hover: #d9005c;
+  --color-primary-light: rgba(255, 0, 110, 0.1);
+  --color-primary-dark: #b30050;
+  --color-primary-glow: 0 0 10px rgba(255, 0, 110, 0.3);
+  
+  /* Accent Colors */
+  --color-accent: #0099cc;
+  --color-accent-hover: #007aa3;
+  --color-accent-glow: 0 0 10px rgba(0, 153, 204, 0.3);
+  
+  /* Secondary */
+  --color-secondary: #9333ea;
+  --color-secondary-hover: #7e22ce;
+  
+  /* Background Colors - Light with warm tint */
+  --color-bg-primary: #fef3f8;
+  --color-bg-secondary: #fce7f3;
+  --color-bg-tertiary: #f9d5e5;
+  --color-bg-elevated: #ffffff;
+  --color-bg-modifier-hover: rgba(255, 0, 110, 0.05);
+  --color-bg-modifier-active: rgba(255, 0, 110, 0.1);
+  --color-bg-modifier-selected: rgba(255, 0, 110, 0.15);
+  
+  /* Text Colors */
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary: #718096;
+  --color-text-muted: #a0aec0;
+  --color-text-link: #0099cc;
+  --color-text-positive: #059669;
+  --color-text-warning: #d97706;
+  --color-text-danger: #dc2626;
+  
+  /* Border Colors */
+  --color-border-primary: #f9d5e5;
+  --color-border-secondary: #fce7f3;
+  --color-border-tertiary: #fef3f8;
+  --color-border-neon: #ff006e;
+  --color-border-cyan: #0099cc;
+  
+  /* Semantic Colors */
+  --color-success: #059669;
+  --color-success-hover: #047857;
+  --color-success-glow: 0 0 10px rgba(5, 150, 105, 0.3);
+  --color-warning: #d97706;
+  --color-warning-hover: #b45309;
+  --color-warning-glow: 0 0 10px rgba(217, 119, 6, 0.3);
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-glow: 0 0 10px rgba(220, 38, 38, 0.3);
+  --color-info: #0099cc;
+  --color-info-hover: #007aa3;
+  --color-info-glow: 0 0 10px rgba(0, 153, 204, 0.3);
+  
+  /* Status Colors */
+  --color-status-online: #059669;
+  --color-status-idle: #d97706;
+  --color-status-dnd: #dc2626;
+  --color-status-offline: #718096;
+  
+  /* Interactive Colors */
+  --color-interactive-normal: #4a5568;
+  --color-interactive-hover: #1a202c;
+  --color-interactive-active: #0099cc;
+  --color-interactive-muted: #a0aec0;
+  
+  /* TUI Grid Colors */
+  --color-grid: rgba(255, 0, 110, 0.05);
+  --color-scanline: rgba(255, 0, 110, 0.02);
+}
+
+/* TUI Scanline Effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.tui-scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-accent) 50%,
+    transparent
+  );
+  opacity: 0.1;
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Scrollbar Styling - Synthwave */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+  border: 2px solid var(--color-bg-primary);
+  border-radius: 6px;
+  box-shadow: var(--color-primary-glow);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-primary-hover), var(--color-secondary-hover));
+  box-shadow: 0 0 30px rgba(255, 0, 110, 0.7);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-primary);
+}
+
+/* Scrollbar for Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-bg-tertiary);
+}
