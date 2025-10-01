@@ -19,8 +19,9 @@ export class RoomsService {
     private usersService: UsersService,
   ) {}
 
-  async create(name: string, maxParticipants?: number): Promise<Room> {
+  async create(name: string, maxParticipants?: number, id?: string): Promise<Room> {
     const room = this.roomsRepository.create({
+      ...(id && { id }), // Include id if provided
       name,
       maxParticipants: maxParticipants || 4,
     });

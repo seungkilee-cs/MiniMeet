@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { UsersService } from '../users/users.service';
 import { RoomsService } from '../rooms/rooms.service';
+import { SearchService } from '../search/search.service';
 
 @Injectable()
 export class MessagesService {
@@ -12,6 +13,7 @@ export class MessagesService {
     private messagesRepository: Repository<Message>,
     private usersService: UsersService,
     private roomsService: RoomsService,
+    private searchService: SearchService,
   ) {}
 
   async create(
@@ -31,6 +33,22 @@ export class MessagesService {
     });
 
     const savedMessage = await this.messagesRepository.save(message);
+
+    // Index the message for search (async, don't wait)
+    this.searchService.indexMessage({
+      id: savedMessage.id,
+      content: savedMessage.content,
+      sender: {
+        id: savedMessage.sender.id,
+        username: savedMessage.sender.username,
+        email: savedMessage.sender.email,
+      },
+      roomId: savedMessage.room.id,
+      createdAt: savedMessage.createdAt,
+    }).catch((error) => {
+      // Log error but don't fail the message creation
+      console.error('Failed to index message:', error);
+    });
 
     return savedMessage;
   }

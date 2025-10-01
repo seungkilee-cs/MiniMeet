@@ -245,7 +245,18 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // 0. Ensure socket mapping exists for WebRTC signaling
       await this.ensureSocketMapping(user.id, client.id);
 
-      // 1. Add user to database first
+      // 1. Check if room exists, create if it doesn't
+      let room;
+      try {
+        room = await this.roomsService.findOne(roomId);
+      } catch (error) {
+        // Room doesn't exist, create it with the requested ID
+        this.logger.log(` Room ${roomId} doesn't exist, creating it`);
+        room = await this.roomsService.create(`Room ${roomId.substring(0, 8)}`, 10, roomId);
+        this.logger.log(` Created room ${room.id} with name ${room.name}`);
+      }
+
+      // 2. Add user to database
       const updatedRoom = await this.roomsService.addUserToRoom(
         roomId,
         user.id,
