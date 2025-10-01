@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 
 @Controller('rooms')
@@ -46,8 +46,17 @@ export class RoomsController {
     return this.roomsService.getRoomParticipants(roomId);
   }
 
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateRoomDto: { name?: string; maxParticipants?: number },
+  ) {
+    return this.roomsService.update(id, updateRoomDto);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.roomsService.remove(id);
+    await this.roomsService.remove(id);
+    return { message: 'Room deleted successfully' };
   }
 }

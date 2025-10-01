@@ -5,8 +5,16 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Environment-based CORS configuration
+  const isProduction = process.env.NODE_ENV === 'production';
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+    : undefined;
+
   app.enableCors({
-    origin: true, // Allow all origins in development
+    origin: isProduction
+      ? corsOrigins || false // Production: use whitelist or deny all
+      : true, // Development: allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -24,5 +32,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 }
 void bootstrap();

@@ -35,3 +35,14 @@ export interface VideoCallResponse {
   roomId: string;
   accepted: boolean;
 }
+
+export interface RoomParticipantsRequest {
+  roomId: string;
+}
+
+export interface ParticipantInfo {
+  id: string;
+  username: string;
+  email: string;
+  socketId?: string;
+}

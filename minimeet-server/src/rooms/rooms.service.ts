@@ -97,6 +97,22 @@ export class RoomsService {
     return room.participants;
   }
 
+  async update(
+    id: string,
+    updateData: { name?: string; maxParticipants?: number },
+  ): Promise<Room> {
+    const room = await this.findOne(id);
+
+    if (updateData.name !== undefined) {
+      room.name = updateData.name;
+    }
+    if (updateData.maxParticipants !== undefined) {
+      room.maxParticipants = updateData.maxParticipants;
+    }
+
+    return this.roomsRepository.save(room);
+  }
+
   async remove(id: string): Promise<void> {
     const room = await this.findOne(id);
     await this.roomsRepository.remove(room);

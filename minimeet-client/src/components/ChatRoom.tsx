@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { socketService } from "../services/socket";
 import { Message, User, CreateMessageDto } from "../types/message.types";
+import MessageSearch from "./MessageSearch";
 import "../style/ChatRoom.css";
 
 interface ChatRoomProps {
@@ -108,6 +109,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   return (
     <div className="chat-room">
       <h2>Chat Room: {roomId}</h2>
+
+      {/* Message Search */}
+      <MessageSearch roomId={roomId} onLog={onLog} onError={onError} />
 
       {/* Participants Section */}
       <div className="participants-section">

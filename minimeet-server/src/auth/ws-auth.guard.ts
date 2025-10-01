@@ -9,6 +9,7 @@ import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { jwtConstants } from './constants';
 import { User } from '../users/entities/user.entity';
+import { SessionService } from '../common/services/session.service';
 
 interface JwtPayload {
   sub: string;
@@ -27,7 +28,10 @@ interface AuthenticatedSocket extends Socket {
 export class WsAuthGuard implements CanActivate {
   private readonly logger = new Logger(WsAuthGuard.name);
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // guard should only run on WebSocket contexts
@@ -56,6 +60,18 @@ export class WsAuthGuard implements CanActivate {
       if (payload.exp && Date.now() >= payload.exp * 1000) {
         throw new WsException('Token expired');
       }
+
+      // Check if session exists in Redis
+      const session = await this.sessionService.getSession(token);
+      if (!session) {
+        this.logger.warn(
+          `Session not found in Redis for socket ${client.id} (user: ${payload.sub})`,
+        );
+        throw new WsException('Session expired or invalid');
+      }
+
+      // Update session last activity
+      await this.sessionService.touchSession(token);
 
       // attach user information to socket for later use
       client.data = {

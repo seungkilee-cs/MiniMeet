@@ -26,4 +26,41 @@ export class UsersService {
     }
     return user;
   }
+
+  /**
+   * Find multiple users by their IDs in a single query
+   * More efficient than multiple findOne calls
+   * @param ids - Array of user IDs
+   * @returns Array of users (may be fewer than input if some IDs don't exist)
+   */
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    return this.usersRepository.findByIds(ids);
+  }
+
+  async update(
+    id: string,
+    updateData: { username?: string; email?: string; isActive?: boolean },
+  ): Promise<User> {
+    const user = await this.findOne(id);
+
+    if (updateData.username !== undefined) {
+      user.username = updateData.username;
+    }
+    if (updateData.email !== undefined) {
+      user.email = updateData.email;
+    }
+    if (updateData.isActive !== undefined) {
+      user.isActive = updateData.isActive;
+    }
+
+    return this.usersRepository.save(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.usersRepository.remove(user);
+  }
 }

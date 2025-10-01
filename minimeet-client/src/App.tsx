@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { apiClient } from "./services/api";
 import { socketService } from "./services/socket";
 import ChatRoom from "./components/ChatRoom";
-import VideoChat from "./components/VideoChat";
+import VideoChatMesh from "./components/VideoChatMesh";
 import AuthSection from "./components/AuthSection";
 import ConnectionSection from "./components/ConnectionSection";
 import StatusDisplay from "./components/StatusDisplay";
@@ -188,7 +188,7 @@ const App: React.FC = () => {
               />
             </div>
 
-            <VideoChat
+            <VideoChatMesh
               roomId={currentRoomId}
               currentUserId={currentUser.id}
               participants={participants}
