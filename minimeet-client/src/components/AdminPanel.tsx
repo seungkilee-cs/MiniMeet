@@ -594,47 +594,37 @@ const AdminPanel: React.FC = () => {
                       </div>
                       <div className="card-body">
                         {room.participants && room.participants.length > 0 ? (
-                          <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full">
-                              <thead>
-                                <tr className="border-b border-border-subtle">
-                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Username</th>
-                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Email</th>
-                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Status</th>
-                                  <th className="text-left p-3 text-sm font-semibold text-secondary">Actions</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {room.participants.map((participant) => (
-                                  <tr key={participant.id} className="border-b border-border-subtle hover:bg-bg-tertiary">
-                                    <td className="p-3 font-medium">{participant.username}</td>
-                                    <td className="p-3 text-secondary">{participant.email}</td>
-                                    <td className="p-3">
-                                      <span className={`badge ${participant.isActive ? 'badge-success' : 'badge-danger'}`}>
-                                        {participant.isActive ? "Active" : "Inactive"}
-                                      </span>
-                                    </td>
-                                    <td className="p-3">
-                                      <button
-                                        onClick={() =>
-                                          handleEvictUser(
-                                            room.id,
-                                            participant.id,
-                                            participant.username
-                                          )
-                                        }
-                                        className="btn btn-sm btn-danger"
-                                      >
-                                        Evict
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="participants-grid">
+                            {room.participants.map((participant) => (
+                              <div key={participant.id} className="participant-card">
+                                <div className="participant-card-header">
+                                  <div>
+                                    <div className="participant-name">{participant.username}</div>
+                                    <div className="participant-email">{participant.email}</div>
+                                  </div>
+                                  <span className={`status ${participant.isActive ? 'active' : 'inactive'}`}>
+                                    {participant.isActive ? "Active" : "Inactive"}
+                                  </span>
+                                </div>
+                                <div className="participant-card-actions">
+                                  <button
+                                    onClick={() =>
+                                      handleEvictUser(
+                                        room.id,
+                                        participant.id,
+                                        participant.username
+                                      )
+                                    }
+                                    className="btn-small btn-delete"
+                                  >
+                                    Evict from Room
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         ) : (
-                          <div className="text-center py-8 text-secondary">
+                          <div className="empty-state">
                             <div className="text-2xl mb-2">👥</div>
                             <p>No participants in this room</p>
                           </div>

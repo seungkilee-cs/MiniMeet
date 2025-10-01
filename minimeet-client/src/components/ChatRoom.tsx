@@ -50,6 +50,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     socketService.onParticipantsUpdate(handleParticipantsUpdate);
     socketService.onMessageHistory(handleMessageHistory);
 
+    // Load message history when joining room
+    onLog(`Loading message history for room ${roomId}`);
+    socketService.loadMessageHistory({ roomId, limit: 50 });
+
     // Cleanup function to remove listeners
     return () => {
       // Remove event listeners to prevent duplicates

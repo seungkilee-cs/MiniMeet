@@ -125,34 +125,66 @@ export class SearchService implements OnModuleInit {
     limit: number = 50,
   ): Promise<any[]> {
     try {
-      const must: any[] = [
+      this.logger.log(`Searching messages for query: "${query}", roomId: ${roomId || 'all'}`);
+      
+      // Build query - simpler approach that works reliably
+      const should: any[] = [
+        // Match content - this handles partial matching naturally
         {
-          multi_match: {
-            query,
-            fields: ['content^2', 'senderUsername'],
-            fuzziness: 'AUTO',
+          match: {
+            content: {
+              query,
+              operator: 'or',
+              boost: 2,
+            },
+          },
+        },
+        // Match username
+        {
+          match: {
+            senderUsername: {
+              query,
+              operator: 'or',
+              boost: 1,
+            },
           },
         },
       ];
 
+      const must: any[] = [];
+      
       if (roomId) {
         must.push({ term: { roomId } });
       }
 
       const result = await this.client.search({
         index: 'messages',
-        query: { bool: { must } },
+        query: {
+          bool: {
+            must,
+            should,
+            minimum_should_match: 1,
+          },
+        },
         highlight: {
           fields: {
             content: {
               pre_tags: ['<mark>'],
               post_tags: ['</mark>'],
+              fragment_size: 150,
+              number_of_fragments: 3,
+            },
+            senderUsername: {
+              pre_tags: ['<mark>'],
+              post_tags: ['</mark>'],
             },
           },
         },
-        sort: [{ timestamp: { order: 'desc' } }],
+        sort: [{ _score: { order: 'desc' } }, { timestamp: { order: 'desc' } }],
         size: limit,
       } as any);
+
+      this.logger.log(`Found ${result.hits.hits.length} results for query: "${query}"`);
 
       return result.hits.hits.map((hit: any) => ({
         id: hit._id,
@@ -164,6 +196,7 @@ export class SearchService implements OnModuleInit {
       this.logger.error(
         `Failed to search messages: ${(error as Error).message}`,
       );
+      this.logger.error(`Search error stack: ${(error as Error).stack}`);
       return [];
     }
   }
@@ -197,10 +230,28 @@ export class SearchService implements OnModuleInit {
       const result = await this.client.search({
         index: 'users',
         query: {
-          multi_match: {
-            query,
-            fields: ['username^2', 'email'],
-            fuzziness: 'AUTO',
+          bool: {
+            should: [
+              {
+                match: {
+                  username: {
+                    query,
+                    operator: 'or',
+                    boost: 2,
+                  },
+                },
+              },
+              {
+                match: {
+                  email: {
+                    query,
+                    operator: 'or',
+                    boost: 1,
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 1,
           },
         },
         size: limit,
@@ -246,7 +297,7 @@ export class SearchService implements OnModuleInit {
           match: {
             name: {
               query,
-              fuzziness: 'AUTO',
+              operator: 'or',
             },
           },
         },

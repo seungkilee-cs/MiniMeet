@@ -25,7 +25,7 @@ const AppDevOnly: React.FC = () => {
       </header>
 
       {/* Show either admin panel or main app */}
-      <div style={{ flex: 1, overflow: "hidden" }}>
+      <div style={{ flex: 1, overflow: showAdmin ? "auto" : "hidden" }}>
         {showAdmin ? <AdminPanel /> : <App />}
       </div>
     </div>
