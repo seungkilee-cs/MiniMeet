@@ -1,67 +1,108 @@
-/* Synthwave/Cyberpunk TUI Theme System */
+/* Enhanced Synthwave Professional Theme System */
 
 :root {
   --theme: dark;
+  
+  /* Enhanced spacing system for better UX */
+  --space-0-5: 2px;
+  --space-1-5: 6px;
+  --space-7: 28px;
+  --space-9: 36px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  
+  /* Professional typography scale */
+  --text-2xs: 0.625rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  
+  /* Enhanced border radius for modern feel */
+  --radius-xs: 1px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
+  
+  /* Professional shadows with better depth */
+  --shadow-xs: 0 0 5px rgba(255, 0, 110, 0.15);
+  --shadow-2xl: 0 0 50px rgba(255, 0, 110, 0.6);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  /* Enhanced transitions for smoother UX */
+  --transition-micro: 50ms;
+  --transition-bounce: 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark Theme (Synthwave/Cyberpunk) */
+/* Enhanced Dark Theme (Professional Synthwave) */
 [data-theme="dark"],
 :root:not([data-theme]) {
-  /* Synthwave Primary Colors - Neon Pink/Purple */
-  --color-primary: #ff006e;
-  --color-primary-hover: #ff1a80;
-  --color-primary-light: rgba(255, 0, 110, 0.15);
-  --color-primary-dark: #d9005c;
-  --color-primary-glow: 0 0 20px rgba(255, 0, 110, 0.5);
+  /* Enhanced Primary Colors with better contrast */
+  --color-primary: #ff0080;
+  --color-primary-hover: #ff3399;
+  --color-primary-light: rgba(255, 0, 128, 0.12);
+  --color-primary-dark: #cc0066;
+  --color-primary-glow: 0 0 24px rgba(255, 0, 128, 0.6);
+  --color-primary-subtle: rgba(255, 0, 128, 0.08);
   
-  /* Accent Colors - Cyan/Teal */
-  --color-accent: #00f5ff;
-  --color-accent-hover: #1affff;
-  --color-accent-glow: 0 0 20px rgba(0, 245, 255, 0.5);
+  /* Enhanced Accent Colors with better readability */
+  --color-accent: #00d9ff;
+  --color-accent-hover: #33e0ff;
+  --color-accent-glow: 0 0 24px rgba(0, 217, 255, 0.6);
+  --color-accent-subtle: rgba(0, 217, 255, 0.08);
   
-  /* Secondary - Purple */
-  --color-secondary: #b537f2;
-  --color-secondary-hover: #c44dff;
+  /* Enhanced Secondary with better balance */
+  --color-secondary: #a855f7;
+  --color-secondary-hover: #c084fc;
   
-  /* Background Colors - Dark with slight blue tint */
-  --color-bg-primary: #0a0e27;
-  --color-bg-secondary: #0f1729;
-  --color-bg-tertiary: #1a1f3a;
-  --color-bg-elevated: #0f1729;
-  --color-bg-modifier-hover: rgba(255, 0, 110, 0.08);
-  --color-bg-modifier-active: rgba(255, 0, 110, 0.15);
-  --color-bg-modifier-selected: rgba(255, 0, 110, 0.2);
+  /* Enhanced Background Colors with better depth */
+  --color-bg-primary: #0a0d1f;
+  --color-bg-secondary: #0f1426;
+  --color-bg-tertiary: #1a1e35;
+  --color-bg-elevated: #1f2340;
+  --color-bg-card: #141829;
+  --color-bg-overlay: rgba(10, 13, 31, 0.95);
+  --color-bg-modifier-hover: rgba(255, 0, 128, 0.06);
+  --color-bg-modifier-active: rgba(255, 0, 128, 0.12);
+  --color-bg-modifier-selected: rgba(255, 0, 128, 0.18);
+  --color-bg-modifier-focus: rgba(0, 217, 255, 0.08);
   
-  /* Text Colors */
-  --color-text-primary: #e0e7ff;
-  --color-text-secondary: #a0aec0;
-  --color-text-tertiary: #718096;
-  --color-text-muted: #4a5568;
-  --color-text-link: #00f5ff;
-  --color-text-positive: #00ff9f;
-  --color-text-warning: #ffb800;
-  --color-text-danger: #ff006e;
+  /* Enhanced Text Colors with better accessibility */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #475569;
+  --color-text-link: #00d9ff;
+  --color-text-positive: #10d97a;
+  --color-text-warning: #fbbf24;
+  --color-text-danger: #ff0080;
   
-  /* Border Colors - Neon glow effect */
-  --color-border-primary: #2d3748;
-  --color-border-secondary: #1a202c;
-  --color-border-tertiary: #0f1729;
-  --color-border-neon: #ff006e;
-  --color-border-cyan: #00f5ff;
+  /* Enhanced Border Colors with better definition */
+  --color-border-primary: #334155;
+  --color-border-secondary: #1e293b;
+  --color-border-tertiary: #0f172a;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-neon: #ff0080;
+  --color-border-cyan: #00d9ff;
+  --color-border-focus: #00d9ff;
   
-  /* Semantic Colors - Synthwave palette */
-  --color-success: #00ff9f;
-  --color-success-hover: #00e68a;
-  --color-success-glow: 0 0 20px rgba(0, 255, 159, 0.5);
-  --color-warning: #ffb800;
-  --color-warning-hover: #ffc933;
-  --color-warning-glow: 0 0 20px rgba(255, 184, 0, 0.5);
-  --color-danger: #ff006e;
-  --color-danger-hover: #ff1a80;
-  --color-danger-glow: 0 0 20px rgba(255, 0, 110, 0.5);
-  --color-info: #00f5ff;
-  --color-info-hover: #1affff;
-  --color-info-glow: 0 0 20px rgba(0, 245, 255, 0.5);
+  /* Enhanced Semantic Colors with better contrast */
+  --color-success: #10d97a;
+  --color-success-hover: #34e89e;
+  --color-success-glow: 0 0 24px rgba(16, 217, 122, 0.6);
+  --color-success-subtle: rgba(16, 217, 122, 0.1);
+  --color-warning: #fbbf24;
+  --color-warning-hover: #fcd34d;
+  --color-warning-glow: 0 0 24px rgba(251, 191, 36, 0.6);
+  --color-warning-subtle: rgba(251, 191, 36, 0.1);
+  --color-danger: #ff0080;
+  --color-danger-hover: #ff3399;
+  --color-danger-glow: 0 0 24px rgba(255, 0, 128, 0.6);
+  --color-danger-subtle: rgba(255, 0, 128, 0.1);
+  --color-info: #00d9ff;
+  --color-info-hover: #33e0ff;
+  --color-info-glow: 0 0 24px rgba(0, 217, 255, 0.6);
+  --color-info-subtle: rgba(0, 217, 255, 0.1);
   
   /* Status Colors */
   --color-status-online: #00ff9f;

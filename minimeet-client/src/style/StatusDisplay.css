@@ -1,42 +1,93 @@
-/* StatusDisplay Component - Discord Style */
+/* Enhanced StatusDisplay - Professional Indicators */
 
-.status-display {
+.status {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
-  background: transparent;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-subtle);
+  border: 1px solid var(--color-success);
   font-size: var(--text-xs);
-  font-weight: 500;
-  transition: all var(--transition-fast) ease;
-}
-
-.status-indicator {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all var(--transition-smooth) ease;
+  box-shadow: var(--color-success-glow);
+  backdrop-filter: blur(4px);
   position: relative;
+  overflow: hidden;
 }
 
-.status-display.connected .status-indicator {
-  background: var(--color-status-online);
+.status::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
 }
 
-.status-display.disconnected .status-indicator {
-  background: var(--color-status-offline);
+.status::after {
+  content: '●';
+  color: var(--color-success);
+  font-size: var(--text-xs);
+  animation: statusPulse 2s ease-in-out infinite;
+  text-shadow: var(--color-success-glow);
 }
 
-.status-text {
-  color: var(--color-text-secondary);
-  font-weight: 500;
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.9); }
 }
 
-.status-display.connected .status-text {
-  color: var(--color-status-online);
+.error {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--color-danger);
+  transition: all var(--transition-smooth) ease;
+  box-shadow: var(--color-danger-glow);
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+  animation: errorSlide var(--transition-bounce) ease;
 }
 
-.status-display.disconnected .status-text {
-  color: var(--color-text-muted);
+@keyframes errorSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.error::before {
+  content: '⚠️';
+  font-size: var(--text-sm);
+  animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.error strong {
+  color: var(--color-danger);
+  text-shadow: var(--color-danger-glow);
 }

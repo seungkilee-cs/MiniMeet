@@ -151,6 +151,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
+      <div className="tui-scanline"></div>
       <header className="app-header">
         <h1>MiniMeet</h1>
         <div className="app-header-actions">
@@ -204,8 +205,22 @@ const App: React.FC = () => {
             </>
           ) : (
             <div className="no-room-message">
-              <h3>No Active Room</h3>
-              <p>Connect to a server and join a room to start chatting</p>
+              <h3>Welcome to MiniMeet</h3>
+              <p>Get started by following these simple steps to join a room and start chatting with others.</p>
+              <div className="steps">
+                <div className="step">
+                  <div className="step-number">1</div>
+                  <span>Enter your User ID and get an authentication token</span>
+                </div>
+                <div className="step">
+                  <div className="step-number">2</div>
+                  <span>Connect to the server using your token</span>
+                </div>
+                <div className="step">
+                  <div className="step-number">3</div>
+                  <span>Enter a Room ID and join to start chatting</span>
+                </div>
+              </div>
             </div>
           )}
         </div>

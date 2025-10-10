@@ -1,4 +1,4 @@
-/* VideoChat Component - Responsive 1-on-1 and Mesh Layout */
+/* Enhanced VideoChat - Professional Layout */
 
 .video-chat {
   display: flex;
@@ -6,25 +6,59 @@
   height: 100%;
   overflow: hidden;
   min-height: 0;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-cyan);
-  border-radius: var(--radius-md);
-  box-shadow: var(--color-info-glow);
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-secondary) 100%);
+  border: 2px solid var(--color-border-cyan);
+  border-radius: var(--radius-2xl);
+  box-shadow: 
+    var(--color-info-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Video Header - matches Chat Room h2 exactly */
+.video-chat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--color-accent) 20%, 
+    var(--color-secondary) 50%, 
+    var(--color-accent) 80%, 
+    transparent 100%);
+  opacity: 0.9;
+}
+
+/* Enhanced Video Header */
 .video-chat h2 {
   color: var(--color-accent);
-  font-size: var(--text-sm);
+  font-size: var(--text-lg);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   margin: 0;
-  padding: var(--space-3);
+  padding: var(--space-5) var(--space-6);
   border-bottom: 2px solid var(--color-border-cyan);
   text-shadow: var(--color-accent-glow);
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(0, 245, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+  background: linear-gradient(135deg, 
+    rgba(0, 217, 255, 0.05) 0%, 
+    transparent 100%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.video-chat h2::before {
+  content: '📹';
+  font-size: var(--text-xl);
+  filter: drop-shadow(0 0 8px var(--color-accent));
 }
 
 /* Controls Section */
@@ -79,24 +113,42 @@
   grid-template-rows: 1fr 1fr;
 }
 
-/* Video Tile */
+/* Enhanced Video Tile */
 .video-tile {
-  background: var(--color-bg-tertiary);
+  background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%);
   border: 2px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Keep this - contains video element */
-  transition: all var(--transition-normal) ease;
+  overflow: hidden;
+  transition: all var(--transition-smooth) ease;
   position: relative;
-  min-height: 200px;
+  min-height: 240px;
+  backdrop-filter: blur(4px);
+  box-shadow: 
+    var(--color-accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .video-tile:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--color-primary-glow);
-  transform: scale(1.02);
+  box-shadow: 
+    var(--color-primary-glow),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.video-tile.local-video {
+  border-color: var(--color-success);
+  box-shadow: var(--color-success-glow);
+}
+
+.video-tile.local-video:hover {
+  border-color: var(--color-success-hover);
+  box-shadow: 
+    0 0 32px rgba(16, 217, 122, 0.8),
+    0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .video-label {
