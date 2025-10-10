@@ -21,6 +21,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const [participants, setParticipants] = useState<User[]>([]);
   const [messageInput, setMessageInput] = useState("");
 
+  // Generate a friendly room name from the room ID
+  const getRoomName = (id: string) => {
+    // Take first 8 characters and format as "Room-XXXXXXXX"
+    const shortId = id.substring(0, 8).toUpperCase();
+    return `Room-${shortId}`;
+  };
+
   // Separate effect for setting up event listeners (run once)
   useEffect(() => {
     // Set up socket event listeners ONCE
@@ -100,7 +107,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <div className="chat-room">
-      <h2>Chat Room: {roomId}</h2>
+      <h2>💬 {getRoomName(roomId)}</h2>
 
       {/* Message Search */}
       <MessageSearch roomId={roomId} onLog={onLog} onError={onError} />
