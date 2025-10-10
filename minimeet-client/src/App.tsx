@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { apiClient } from "./services/api";
 import { socketService } from "./services/socket";
 import ChatRoom from "./components/ChatRoom";
@@ -28,6 +28,13 @@ const App: React.FC = () => {
   } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+  // Close sidebar when leaving a room
+  useEffect(() => {
+    if (!currentRoomId) {
+      setIsSidebarOpen(false);
+    }
+  }, [currentRoomId]);
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -158,7 +165,7 @@ const App: React.FC = () => {
       <div className="tui-scanline"></div>
       <header className="app-header">
         <button 
-          className="mobile-menu-button"
+          className={`mobile-menu-button ${currentRoomId ? 'always-show' : ''}`}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           aria-label="Toggle menu"
         >
@@ -174,9 +181,9 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="app-main">
+      <main className={`app-main ${currentRoomId ? 'sidebar-modal-mode' : ''}`}>
         {isSidebarOpen && <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />}
-        <aside className={`app-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <aside className={`app-sidebar ${isSidebarOpen ? 'open' : ''} ${currentRoomId ? 'modal-mode' : ''}`}>
           <div className="sidebar-header">
             <h2>Controls</h2>
             <button 

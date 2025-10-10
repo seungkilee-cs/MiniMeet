@@ -20,13 +20,31 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<User[]>([]);
   const [messageInput, setMessageInput] = useState("");
+  const [roomName, setRoomName] = useState<string>("");
 
   // Generate a friendly room name from the room ID
   const getRoomName = (id: string) => {
-    // Take first 8 characters and format as "Room-XXXXXXXX"
+    // Create a mapping of common room IDs to friendly names
+    const roomNameMap: { [key: string]: string } = {
+      'be20a495-f7c8-47ee-bc7b-8a2571798a39': 'Room E - Mesh Test',
+      'be20a495-f7c8-47ee-bc7b-8a257179ba39': 'Room A - Main Test',
+      // Add more mappings as needed
+    };
+
+    // Check if we have a friendly name for this room
+    if (roomNameMap[id]) {
+      return roomNameMap[id];
+    }
+
+    // Fallback: create a name from the first part of the ID
     const shortId = id.substring(0, 8).toUpperCase();
-    return `Room-${shortId}`;
+    return `Room ${shortId.charAt(0)} - ${shortId.substring(1)}`;
   };
+
+  // Load room name
+  useEffect(() => {
+    setRoomName(getRoomName(roomId));
+  }, [roomId]);
 
   // Separate effect for setting up event listeners (run once)
   useEffect(() => {
@@ -107,7 +125,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   return (
     <div className="chat-room">
-      <h2>💬 {getRoomName(roomId)}</h2>
+      <h2>{roomName}</h2>
 
       {/* Message Search */}
       <MessageSearch roomId={roomId} onLog={onLog} onError={onError} />
