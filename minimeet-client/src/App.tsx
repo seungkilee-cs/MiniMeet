@@ -7,6 +7,8 @@ import AuthSection from "./components/AuthSection";
 import ConnectionSection from "./components/ConnectionSection";
 import StatusDisplay from "./components/StatusDisplay";
 import ThemeToggle from "./components/ThemeToggle";
+import AdminToggle from "./components/AdminToggle";
+import AdminPanel from "./components/AdminPanel";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -24,6 +26,8 @@ const App: React.FC = () => {
     id: string;
     username: string;
   } | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -153,15 +157,39 @@ const App: React.FC = () => {
     <div className="app">
       <div className="tui-scanline"></div>
       <header className="app-header">
+        <button 
+          className="mobile-menu-button"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          aria-label="Toggle menu"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
         <h1>MiniMeet</h1>
         <div className="app-header-actions">
           <StatusDisplay status={status} error={error} />
+          <AdminToggle onClick={() => setShowAdminPanel(!showAdminPanel)} />
           <ThemeToggle />
         </div>
       </header>
 
       <main className="app-main">
-        <aside className="app-sidebar">
+        {isSidebarOpen && <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />}
+        <aside className={`app-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <div className="sidebar-header">
+            <h2>Controls</h2>
+            <button 
+              className="sidebar-close-button"
+              onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close menu"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+          
           <AuthSection
             userId={userId}
             token={token}
@@ -227,6 +255,29 @@ const App: React.FC = () => {
 
         {/* <ConsoleLog logs={logs} /> */}
       </main>
+
+      {/* Admin Panel Modal */}
+      {showAdminPanel && (
+        <div className="admin-panel-overlay" onClick={() => setShowAdminPanel(false)}>
+          <div className="admin-panel-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-panel-header">
+              <h2>🔧 Admin Panel</h2>
+              <button 
+                className="admin-panel-close"
+                onClick={() => setShowAdminPanel(false)}
+                aria-label="Close admin panel"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div className="admin-panel-content">
+              <AdminPanel />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

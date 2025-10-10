@@ -67,11 +67,13 @@
   border-bottom: 1px solid var(--color-border-primary);
 }
 
-/* Participants Section - Horizontal Compact */
+/* Participants Section - Compact and Scrollable */
 .participants-section {
   padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--color-border-primary);
   flex-shrink: 0;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .participants-section h3 {
@@ -124,6 +126,7 @@
   overflow: hidden;
   padding: var(--space-3);
   min-height: 0;
+  max-height: 100%;
 }
 
 .chat-section h3 {
@@ -139,7 +142,7 @@
   flex-shrink: 0;
 }
 
-/* Messages Container - Scrollable */
+/* Messages Container - Properly Scrollable */
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -148,6 +151,8 @@
   background: var(--color-bg-tertiary);
   padding: var(--space-2);
   margin-bottom: var(--space-2);
+  min-height: 0;
+  max-height: 100%;
 }
 
 .messages-container p {
@@ -241,6 +246,7 @@
   gap: var(--space-2);
   align-items: end;
   flex-shrink: 0;
+  position: relative;
 }
 
 .message-textarea {
@@ -256,6 +262,7 @@
   transition: all var(--transition-fast) ease;
   resize: none;
   height: 60px;
+  max-height: 120px;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
