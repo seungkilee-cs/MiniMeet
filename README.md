@@ -1,253 +1,562 @@
 # MiniMeet
 
-<!-- > [한글](README.ko.md)로도 볼 수 있습니다. -->
-
 Multi-User Video Chat Application using NestJS, TypeScript, TypeORM, Socket.IO, WebRTC
 
-## Motivation
+## Overview
 
-To build a functioning prototype of a real-time video chat application using a specific tech stack, demonstrating enterprise-grade architecture patterns and distributed systems principles.
+MiniMeet is a real-time video chat application that demonstrates modern web technologies for peer-to-peer communication. The application provides text chat, video calling, and room management capabilities through a responsive web interface.
 
 ## Current Status
 
-![WebRTC](./_screenshots/2.5.WebRTC_Video_Chat_TS/React_Client.png)
+![Dark Theme](./_screenshots/5.1.Synth/synth_dark.png) 
+![Light Theme](./_screenshots/5.1.Synth/synth_light.png)
 
-Completed Milestones:
+### Implemented Features
 
-- Backend Foundation : NestJS API with TypeORM, MySQL integration
-- Authentication System : JWT-based auth with WebSocket security guards
-- Real-Time Chat : Socket.IO messaging with DTO validation
-- WebRTC Video Implementation (Milestone 2.5): Peer-to-peer video streaming
-- React + TypeScript Frontend: Production-ready client interface
+- **Backend API**: NestJS with TypeORM and MySQL database integration
+- **Authentication**: JWT-based authentication with WebSocket security guards
+- **Real-Time Chat**: Socket.IO messaging with message persistence and validation
+- **Video Communication**: WebRTC peer-to-peer video streaming with mesh topology
+- **Frontend Interface**: React + TypeScript client with responsive design
+- **Admin Panel**: Development tools for user and room management
+- **Search Functionality**: User and room search with real-time filtering
+- **Theme System**: Dark/light theme toggle with synthwave aesthetic
 
-## Goal & Roadmap
+## Architecture
 
-### 1. Backend Foundation and Real Time Chat
+### System Components
 
-#### Problem Breakdown & Solutions
+**Backend Services**
+- NestJS application server with modular architecture
+- TypeORM for database operations and entity management
+- Socket.IO gateway for real-time communication
+- WebRTC signaling server for peer-to-peer connections
+- JWT authentication with WebSocket security guards
 
-- Data Persistence: Reliable user accounts and room management with TypeORM + MySQL
-- API Consistency: Type-safe DTOs with class-validator for robust data contracts
-- Architecture Scalability: Modular NestJS structure with dependency injection
+**Frontend Application**
+- React + TypeScript single-page application
+- Socket.IO client for real-time updates
+- WebRTC implementation for video streaming
+- Responsive design with mobile support
+- Theme system with dark/light mode toggle
 
-#### Deliverables
+**Data Storage**
+- MySQL database for user accounts, rooms, and messages
+- In-memory session management for active connections
+- Message history persistence with search capabilities
 
-- [x] Room creation and management with participant tracking
-- [x] RESTful API endpoints with full type safety
-- [x] Database relationships supporting real-time interactions
-- [x] Comprehensive error handling and DTO validation (Needed for MongoDB Key-Document message Support)
-- [x] JWT authentication system with WebSocket security
-- [x] Real-time text chat with message persistence
-- [x] WebSocket authentication guards and session management
+## Features
 
-### 2. Real Time Video Communication
+### User Management
+- JWT-based authentication system
+- User registration and profile management
+- Session management with automatic token refresh
+- Admin panel for user administration (development mode)
 
-#### Problem Breakdown
+### Room Management
+- Create and join video chat rooms
+- Real-time participant tracking
+- Room search functionality
+- Automatic cleanup of inactive rooms
 
-- WebRTC Signaling: Implement offer/answer/ICE candidate exchange via Socket.IO
-- Peer Connection Management: Handle 1-on-1 and multi-party video calls
-- Media Stream Coordination: Camera/microphone access and stream sharing
-- Network Resilience: Handle NAT traversal, connection failures, and reconnections
+### Communication
+- Real-time text messaging with Socket.IO
+- Message history persistence and retrieval
+- Message search functionality
+- WebRTC peer-to-peer video calls
+- Mesh topology for multi-participant video
+- Audio/video controls (mute, camera toggle)
 
-#### Deliverables
+### User Interface
+- Responsive design for desktop and mobile
+- Dark and light theme support
+- Synthwave-inspired visual design
+- Modal sidebar for in-room experience
+- Real-time status indicators
+- Search bars for users and rooms
 
-- [x] WebRTC signaling server implementation
-- [x] 1-on-1 video call functionality
-- [ ] Multi-party video calls (up to 4 participants)
-- [ ] Media device management (camera/microphone toggle)
-- [x] Connection state management and error recovery
+## Technology Stack
 
-### 3. Frontend
+### Backend
+- **NestJS**: Application framework with dependency injection
+- **TypeScript**: Type-safe development environment
+- **TypeORM**: Database ORM with entity relationships
+- **Socket.IO**: Real-time bidirectional communication
+- **MySQL**: Relational database for data persistence
+- **JWT**: Token-based authentication system
+- **Class Validator**: DTO validation and sanitization
 
-#### Technology Choice: React + TypeScript
+### Frontend
+- **React**: Component-based user interface library
+- **TypeScript**: Static type checking for JavaScript
+- **Socket.IO Client**: Real-time communication with server
+- **WebRTC**: Peer-to-peer video and audio streaming
+- **CSS3**: Modern styling with custom properties
+- **Responsive Design**: Mobile-first approach
 
-- Component Reusability: Modular UI components
-- Type Safety: Shared DTOs between frontend and backend
-- State Management: Complex real-time UI state handling
-- Production Scale: Professional UX for real users
+### Development Tools
+- **Docker Compose**: Containerized development environment
+- **ESLint**: Code quality and consistency
+- **Prettier**: Code formatting
+- **Hot Reload**: Development server with live updates
 
-#### Deliverables
+## System Architecture
 
-- [x] React + TypeScript project scaffold
-- [x] Authenticated routing and session management
-- [x] Real-time chat interface with DTO validation
-- [x] Video call UI with WebRTC integration
-- [ ] Responsive design for desktop and mobile
-
-### 4. Performance & Scalability
-
-- [ ] Redis integration for session management and caching
-- [ ] MongoDB for flexible message storage and attachments
-- [ ] ElasticSearch for chat history search
-- [ ] Load balancing and horizontal scaling
-- [ ] Production deployment with Docker
-
-## Application Overview
-
-### Core Features
-
-- [x] JWT-based user authentication
-- [x] Create/join video chat rooms with real-time presence
-- [x] Real-time text chat with message persistence
-- [x] WebSocket authentication and authorization
-- [x] DTO-validated message handling
-- [x] 1-on-1 and group video calls (WebRTC)
-- [x] React + TypeScript frontend interface
-- [ ] Video call controls (mute, camera toggle)
-- [ ] Chat history search (ElasticSearch)
-- [ ] Call analytics and user presence indicators
-
-### Technology Stack
-
-#### Core Implementation
-
-Backend: `NestJS + TypeScript + TypeORM + Socket.IO + WebRTC`
-Frontend: `React + TypeScript + Socket.IO Client`
-Database: `MySQL (TypeORM)`
-
-#### Development vs Production
-
-```
-Development (Current):
-- MySQL                   -> Simple relational data
-- Socket.IO               -> Real-time communication
-- React + TS Client       -> Rapid prototyping
-- Local development       -> Easy setup and testing
-
-Production (Planned):
-- AWS Aurora (MySQL)      -> Managed relational database
-- Redis                   -> Session management and caching
-- MongoDB                 -> Flexible message content storage
-- ElasticSearch           -> Fast full-text search
-- React + TS Frontend     -> Professional user interface
-- Docker Compose          -> Containerized deployment
-```
-
-### Backend Architecture
+### Application Structure
 
 ```
-┌─────────────────┐    ┌──────────────────────────────────┐
-│   Test Client   │    │         NestJS Backend           │
-│    React+TS     │◄──►│  ┌─────────────────────────────┐ │
-└─────────────────┘    │  │     VideoGateway            │ │
-                       │  │   (Socket.IO + Auth)        │ │
-                       │  └─────────────────────────────┘ │
-                       │  ┌─────────┬─────────┬─────────┐ │
-                       │  │  Auth   │  Rooms  │Messages │ │
-                       │  │ Module  │ Module  │ Module  │ │
-                       │  └─────────┴─────────┴─────────┘ │
-                       └──────────────────────────────────┘
-                                         │
-                                ┌────────▼────────┐
-                                │ MySQL Database  │
-                                │   (TypeORM)     │
-                                └─────────────────┘
+┌─────────────────────┐    ┌─────────────────────────────┐
+│   React Frontend    │    │      NestJS Backend         │
+│                     │    │                             │
+│  ┌───────────────┐  │    │  ┌─────────────────────────┐│
+│  │ Chat Interface│  │◄──►│  │    Socket.IO Gateway    ││
+│  └───────────────┘  │    │  │   (Real-time Events)    ││
+│  ┌───────────────┐  │    │  └─────────────────────────┘│
+│  │ Video Calling │  │◄──►│  ┌─────────────────────────┐│
+│  └───────────────┘  │    │  │   WebRTC Signaling      ││
+│  ┌───────────────┐  │    │  │    (Video Streams)      ││
+│  │ Admin Panel   │  │◄──►│  └─────────────────────────┘│
+│  └───────────────┘  │    │  ┌─────────┬─────────┬─────┐│
+└─────────────────────┘    │  │  Auth   │  Rooms  │Msgs ││
+                           │  │ Service │ Service │Svc  ││
+                           │  └─────────┴─────────┴─────┘│
+                           └─────────────────────────────┘
+                                           │
+                                  ┌────────▼────────┐
+                                  │ MySQL Database  │
+                                  │   (TypeORM)     │
+                                  └─────────────────┘
 ```
 
-### Final Architecture With Frontend
+### Data Flow
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   React + TS    │    │   NestJS API     │    │  Media Services │
-│   Frontend      │◄──►│   Gateway        │◄──►│    (WebRTC)     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                 │
-                    ┌────────────┼───────────┐
-                    │            │           │
-            ┌───────▼───┐ ┌──────▼───┐ ┌─────▼─────┐
-            │ Socket.io │ │ Database │ │   Redis   │
-            │  Gateway  │ │ Services │ │  Cache    │
-            └───────────┘ └──────────┘ └───────────┘
+User Authentication:
+Client → JWT Request → NestJS Auth → Database → JWT Token → Client
+
+Real-time Chat:
+Client → Socket.IO → Message Gateway → Database → Broadcast → All Clients
+
+Video Calling:
+Client A → WebRTC Offer → Signaling Server → Client B
+Client B → WebRTC Answer → Signaling Server → Client A
+Direct P2P Connection Established
+
+Room Management:
+Client → Join Room → Room Service → Database Update → Participant Broadcast
 ```
 
-## Implementation Details
+## Project Structure
 
-### Current Module Structure
+### Backend (minimeet-server)
 
 ```
 src/
-├── auth/              # JWT authentication & WebSocket guards
-│   ├── auth.service.ts
-│   ├── auth.controller.ts
-│   └── ws-auth.guard.ts
-├── users/             # User entity and management
-├── rooms/             # Video room management with participants
-│   ├── rooms.service.ts
-│   └── entities/room.entity.ts
-├── messages/          # Real-time chat with DTO validation
-│   ├── messages.service.ts
-│   ├── entities/message.entity.ts
-│   └── dto/
-│       ├── create-message.dto.ts
-│       └── load-message-history.dto.ts
-├── video/             # WebRTC signaling
-│   └── video.gateway.ts
+├── auth/              # JWT authentication and WebSocket guards
+├── users/             # User management and profiles
+├── rooms/             # Room creation and participant management
+├── messages/          # Chat messaging with persistence
+├── video/             # WebRTC signaling gateway
+├── webrtc/            # WebRTC connection management
+├── search/            # Message and user search functionality
+├── analytics/         # Usage analytics and monitoring
+├── config/            # Application configuration
 └── common/            # Shared utilities and guards
 ```
 
-### Database Schema (TypeORM)
+### Frontend (minimeet-client)
 
 ```
-User ──┐
-       ├─► Room (many-to-many participants)
-       └─► Message (one-to-many sender)
-Room ──┐
-       ├─► Message (one-to-many room)
-       └─► CallSession (one-to-many, planned)
+src/
+├── components/        # React UI components
+│   ├── AuthSection.tsx
+│   ├── ChatRoom.tsx
+│   ├── VideoChatMesh.tsx
+│   ├── AdminPanel.tsx
+│   ├── UserSearchBar.tsx
+│   ├── RoomSearchBar.tsx
+│   └── ThemeToggle.tsx
+├── services/          # API and Socket.IO clients
+├── hooks/             # Custom React hooks
+├── types/             # TypeScript type definitions
+├── style/             # CSS modules and themes
+└── utils/             # Utility functions
 ```
 
-### WebSocket Events (Implemented)
+### Database Schema
 
-```typescript
-// Authentication & Room Management
-'joinRoom' → Room participation with database sync
-'leaveRoom' → Clean disconnection and state update
-'participantsUpdate' → Real-time presence broadcasting
-
-// Real-Time Chat
-'sendMessage' → DTO-validated message creation
-'newMessage' → Real-time message broadcasting
-'loadMessageHistory' → Persistent chat history
-'messageError' → Validation error feedback
-
-// WebRTC Signaling (Planned)
-'webrtc-offer' → Peer connection initiation
-'webrtc-answer' → Connection response handling
-'ice-candidate' → Network traversal coordination
+```
+┌─────────────┐     ┌─────────────────┐     ┌─────────────┐
+│    User     │     │ RoomParticipant │     │    Room     │
+├─────────────┤     ├─────────────────┤     ├─────────────┤
+│ id (PK)     │◄───►│ userId (FK)     │◄───►│ id (PK)     │
+│ username    │     │ roomId (FK)     │     │ name        │
+│ email       │     │ joinedAt        │     │ createdAt   │
+│ createdAt   │     └─────────────────┘     │ maxUsers    │
+└─────────────┘                             └─────────────┘
+       │                                           │
+       │                                           │
+       ▼                                           ▼
+┌─────────────┐                           ┌─────────────┐
+│   Message   │                           │ CallSession │
+├─────────────┤                           ├─────────────┤
+│ id (PK)     │                           │ id (PK)     │
+│ content     │                           │ roomId (FK) │
+│ senderId(FK)│                           │ startedAt   │
+│ roomId (FK) │                           │ endedAt     │
+│ timestamp   │                           │ participants│
+└─────────────┘                           └─────────────┘
 ```
 
-## Testing & Validation
+### API Endpoints
 
-### Testing Approach
+**Authentication**
+- `POST /auth/token` - Generate JWT token for user
+- `GET /auth/validate` - Validate existing token
 
-- [x] Multi-user scenarios: Different users in same room
-- [ ] Authentication flow: JWT token generation and WebSocket auth
-- [x] Real-time updates: Message broadcasting and participant management
-- [x] DTO validation: Client and server-side input validation
-- [ ] Error handling: Graceful failure scenarios and user feedback
+**Users**
+- `GET /users` - List all users (admin)
+- `POST /users` - Create new user (admin)
+- `PUT /users/:id` - Update user (admin)
+- `DELETE /users/:id` - Delete user (admin)
 
-## Next Steps
+**Rooms**
+- `GET /rooms` - List all rooms
+- `POST /rooms` - Create new room (admin)
+- `PUT /rooms/:id` - Update room (admin)
+- `DELETE /rooms/:id` - Delete room (admin)
 
-### P0. Immediate
+**Messages**
+- `GET /messages/:roomId` - Get room message history
+- `POST /messages/search` - Search messages by content
 
-1. Implement WebRTC signaling handlers in VideoGateway
-2. Add peer connection management for 1-on-1 calls
-3. Integrate getUserMedia() for camera/microphone access
-4. Handle ICE candidate exchange and connection states
-5. Test video calls between two clients
+### WebSocket Events
 
-### P1. Short-term: Frontend
+**Room Management**
+- `joinRoom` - Join a chat room
+- `leaveRoom` - Leave current room
+- `participantsUpdate` - Broadcast participant changes
 
-1. Scaffold React + TypeScript project structure
-2. Implement shared DTO types between frontend and backend
-3. Create authentication flow and protected routes
-4. Build chat interface components with real-time updates
-5. Integrate WebRTC functionality into React components
+**Messaging**
+- `sendMessage` - Send chat message
+- `newMessage` - Receive new messages
+- `loadMessageHistory` - Load chat history
+- `messageError` - Handle message validation errors
 
-### P2. Long-term: Production Features
+**WebRTC Signaling**
+- `webrtc-offer` - Initiate video call
+- `webrtc-answer` - Respond to video call
+- `ice-candidate` - Exchange network information
+- `call-ended` - Handle call termination
 
-1. Multi-party video calls with SFU architecture
-2. Redis integration for scalable session management
-3. MongoDB for rich message content and file attachments
-4. ElasticSearch for chat history search capabilities
-5. Docker containerization and cloud deployment
+## Getting Started
+
+### Prerequisites
+
+- Node.js 16+ and npm
+- MySQL 8.0+
+- Modern web browser with WebRTC support
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd minimeet
+```
+
+2. Install dependencies
+```bash
+# Backend
+cd minimeet-server
+npm install
+
+# Frontend
+cd ../minimeet-client
+npm install
+```
+
+3. Configure database
+```bash
+# Create MySQL database
+mysql -u root -p
+CREATE DATABASE minimeet;
+```
+
+4. Set environment variables
+```bash
+# minimeet-server/.env
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_password
+DATABASE_NAME=minimeet
+JWT_SECRET=your_jwt_secret
+```
+
+5. Start the application
+```bash
+# Start backend (from minimeet-server)
+npm run start:dev
+
+# Start frontend (from minimeet-client)
+npm start
+```
+
+### Usage
+
+1. **Authentication**: Enter a user ID and generate an authentication token
+2. **Connection**: Connect to the server using the generated token
+3. **Join Room**: Enter a room ID or search for existing rooms
+4. **Chat**: Send and receive real-time messages
+5. **Video Call**: Start video calls with other participants
+6. **Admin Panel**: Access development tools (development mode only)
+
+## Development
+
+### Running Tests
+
+```bash
+# Backend tests
+cd minimeet-server
+npm run test
+
+# Frontend tests
+cd minimeet-client
+npm test
+```
+
+### Building for Production
+
+```bash
+# Backend
+cd minimeet-server
+npm run build
+
+# Frontend
+cd minimeet-client
+npm run build
+```
+
+### Docker Development
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild containers
+docker-compose up --build
+```
+
+### Environment Configuration
+
+**Backend Environment Variables**
+```bash
+# Database Configuration
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_password
+DATABASE_NAME=minimeet
+
+# Authentication
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=24h
+
+# Server Configuration
+PORT=3001
+CORS_ORIGIN=http://localhost:3000
+
+# WebSocket Configuration
+SOCKET_CORS_ORIGIN=http://localhost:3000
+```
+
+**Frontend Environment Variables**
+```bash
+# API Configuration
+REACT_APP_API_URL=http://localhost:3001
+REACT_APP_SOCKET_URL=http://localhost:3001
+
+# Development Settings
+REACT_APP_ENV=development
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Database Connection Errors**
+- Verify MySQL is running and accessible
+- Check database credentials in environment variables
+- Ensure database exists and user has proper permissions
+
+**WebRTC Connection Issues**
+- Check browser WebRTC support (Chrome, Firefox, Safari recommended)
+- Verify HTTPS is used in production (required for WebRTC)
+- Check firewall settings for UDP traffic
+
+**Socket.IO Connection Problems**
+- Verify CORS configuration matches frontend URL
+- Check network connectivity between client and server
+- Ensure WebSocket support is enabled
+
+**Authentication Failures**
+- Verify JWT secret is consistent between requests
+- Check token expiration settings
+- Ensure proper token format in Authorization header
+
+### Performance Optimization
+
+**Database Performance**
+- Add indexes on frequently queried columns
+- Implement connection pooling
+- Consider read replicas for high traffic
+
+**WebRTC Optimization**
+- Implement TURN servers for NAT traversal
+- Consider SFU architecture for large groups
+- Optimize video quality based on bandwidth
+
+**Frontend Performance**
+- Implement lazy loading for components
+- Use React.memo for expensive components
+- Optimize bundle size with code splitting
+
+## Deployment
+
+### Production Deployment
+
+**Backend Deployment**
+```bash
+# Build the application
+npm run build
+
+# Start production server
+npm run start:prod
+
+# Or use PM2 for process management
+pm2 start dist/main.js --name minimeet-server
+```
+
+**Frontend Deployment**
+```bash
+# Build for production
+npm run build
+
+# Serve static files (using nginx, apache, or CDN)
+# Build output is in the 'build' directory
+```
+
+**Database Setup**
+```sql
+-- Production database setup
+CREATE DATABASE minimeet_prod;
+CREATE USER 'minimeet'@'%' IDENTIFIED BY 'secure_password';
+GRANT ALL PRIVILEGES ON minimeet_prod.* TO 'minimeet'@'%';
+FLUSH PRIVILEGES;
+```
+
+### Docker Production
+
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_HOST=db
+    depends_on:
+      - db
+  
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secure_password
+      MYSQL_DATABASE: minimeet_prod
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+```
+
+### Security Considerations
+
+**Production Security Checklist**
+- [ ] Use HTTPS for all communications
+- [ ] Implement rate limiting on API endpoints
+- [ ] Validate and sanitize all user inputs
+- [ ] Use secure JWT secrets (256-bit minimum)
+- [ ] Enable CORS only for trusted domains
+- [ ] Implement proper error handling (no sensitive data exposure)
+- [ ] Use environment variables for all secrets
+- [ ] Enable database SSL connections
+- [ ] Implement proper logging and monitoring
+- [ ] Regular security updates for dependencies
+
+## Monitoring and Analytics
+
+### Application Metrics
+
+The application includes basic analytics tracking:
+- User registration and authentication events
+- Room creation and participation metrics
+- Message volume and frequency
+- Video call duration and quality metrics
+
+### Health Checks
+
+```bash
+# Check server health
+curl http://localhost:3001/health
+
+# Check database connection
+curl http://localhost:3001/health/db
+
+# Check WebSocket connectivity
+curl http://localhost:3001/health/socket
+```
+
+### Logging
+
+Application logs include:
+- Authentication events
+- Room join/leave activities
+- Message sending/receiving
+- WebRTC connection establishment
+- Error tracking and debugging information
+
+## Roadmap
+
+### Planned Features
+
+**Short Term**
+- File sharing in chat rooms
+- Screen sharing capabilities
+- Message reactions and threading
+- User presence indicators
+- Mobile app development
+
+**Medium Term**
+- SFU implementation for larger groups
+- Recording and playback functionality
+- Advanced admin dashboard
+- Integration with external authentication providers
+- API rate limiting and quotas
+
+**Long Term**
+- Horizontal scaling with Redis
+- Advanced analytics dashboard
+- Plugin system for extensions
+- Enterprise features (SSO, compliance)
+- AI-powered features (transcription, translation)
